@@ -1,0 +1,57 @@
+# Camada de discussão (IBIS) + argumentação (Dung).
+# Cada argumento tem uma AFIRMAÇÃO sobre um alvo (uma opção = "posição" IBIS),
+# com postura pró/contra. 'attacks' lista ids de argumentos que este REFUTA
+# (arestas do grafo de argumentação de Dung). O motor calcula a extensão
+# 'grounded' — quais argumentos sobrevivem ao debate.
+#   target: id de uma opção (posição)
+#   stance: pro | con      (em relação ao alvo)
+#   attacks: [arg.id, ...]  (opcional; refutação)
+arguments:
+  - id: arg.sub.github_pro
+    target: opt.substrato.github
+    stance: pro
+    claim: "Maior alcance e ferramentas nativas (Actions, Pages, fork/PR) onde humanos e agentes já estão."
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+
+  - id: arg.sub.github_con
+    target: opt.substrato.github
+    stance: con
+    claim: "Dependência de uma plataforma proprietária (lock-in); dados sob jurisdição estrangeira."
+    by: "@comunidade"
+
+  - id: arg.sub.portabilidade
+    target: opt.substrato.github
+    stance: pro
+    claim: "O conteúdo é texto aberto em Git, portável a qualquer forja — o que mitiga o lock-in."
+    by: "agent:revisor-2"
+    model: "claude-opus-4-8 (perspectiva diversa simulada)"
+    attacks: [arg.sub.github_con]
+
+  - id: arg.sub.gitlab_pro
+    target: opt.substrato.gitlab
+    stance: pro
+    claim: "Self-hosting dá soberania de dados — relevante para uma universidade pública."
+    by: "agent:revisor-2"
+    model: "claude-opus-4-8 (perspectiva diversa simulada)"
+
+  - id: arg.sub.gitlab_con
+    target: opt.substrato.gitlab
+    stance: con
+    claim: "Menor alcance público reduz a participação espontânea da comunidade."
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+
+  - id: arg.cons.agente_unico_con
+    target: opt.consolidacao.agente_unico
+    stance: con
+    claim: "Um único modelo consolidando tende a impor seus vieses — contraria o princípio de diversidade."
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+
+  - id: arg.cons.swarm_pro
+    target: opt.consolidacao.swarm
+    stance: pro
+    claim: "Múltiplos modelos propondo/criticando reduzem pontos cegos; quorum evita dominância."
+    by: "agent:discovery"
+    model: "claude-opus-4-8"

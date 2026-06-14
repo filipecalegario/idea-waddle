@@ -73,12 +73,19 @@ def load_case(case_dir: Path) -> dict:
         adata = yaml.safe_load(afile.read_text(encoding="utf-8")) or {}
         assumptions = adata.get("assumptions", {}) or {}
 
+    arguments = []
+    argfile = case_dir / "morphology" / "arguments.yaml"
+    if argfile.exists():
+        argdata = yaml.safe_load(argfile.read_text(encoding="utf-8")) or {}
+        arguments = argdata.get("arguments", []) or []
+
     return {
         "id": case_dir.resolve().name,
         "parameters": params,
         "constraints": constraints,
         "criteria": criteria,
         "assumptions": assumptions,
+        "arguments": arguments,
     }
 
 
@@ -130,6 +137,36 @@ def compute_cca(case: dict) -> dict:
         "sample_configs": sample_configs,
         "weak": weak,
     }
+
+
+def grounded_extension(arguments: list) -> dict:
+    """Semântica 'grounded' de Dung: rotula cada argumento como aceito/derrotado/
+    indeciso a partir das relações de ataque. Retorna {arg_id: 'in'|'out'|'undecided'}."""
+    ids = [a["id"] for a in arguments if a.get("id")]
+    idset = set(ids)
+    # attackers[b] = conjunto de a que atacam b
+    attackers = {i: set() for i in ids}
+    for a in arguments:
+        src = a.get("id")
+        for tgt in a.get("attacks", []) or []:
+            if tgt in idset and src in idset:
+                attackers[tgt].add(src)
+
+    label = {}  # in | out
+    changed = True
+    while changed:
+        changed = False
+        for i in ids:
+            if i in label:
+                continue
+            atks = attackers[i]
+            if all(x in label and label[x] == "out" for x in atks):
+                label[i] = "in"
+                changed = True
+            elif any(x in label and label[x] == "in" for x in atks):
+                label[i] = "out"
+                changed = True
+    return {i: label.get(i, "undecided") for i in ids}
 
 
 def label_for(case: dict, opt_id: str) -> str:
@@ -296,6 +333,37 @@ CASE_TEMPLATE = r"""<!doctype html>
   ul.cons li.weak { box-shadow:inset 3px 0 0 var(--ochre); }
   ul.cons b { font-family:var(--disp); font-weight:600; }
   ul.cons small { color:var(--ink-2); }
+  .badge.ok { color:var(--ok); }
+  .layer { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-2); border:1px solid var(--rule-2); padding:1px 7px; margin-left:8px; vertical-align:middle; }
+
+  /* IBIS + argumentação */
+  .ibis { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .issue { background:var(--panel); border:1px solid var(--rule-2); padding:14px 16px; }
+  .issue-q { font-family:var(--disp); font-weight:600; font-size:15px; margin-bottom:10px;
+    padding-bottom:8px; border-bottom:1px solid var(--rule); }
+  .arg { border-left:2px solid var(--rule-2); padding:7px 0 9px 12px; margin-bottom:10px; }
+  .arg.ok { border-left-color:var(--ok); }
+  .arg.hard { border-left-color:var(--signal); }
+  .arg.weak { border-left-color:var(--ochre); }
+  .arg .stance { font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2); }
+  .arg .claim { font-size:13.5px; margin-top:5px; }
+  .arg.hard .claim { text-decoration:line-through; opacity:.7; }
+  .arg .arg-ref { font-family:var(--mono); font-size:10.5px; color:var(--signal); margin-top:4px; }
+  .arg .arg-by { font-family:var(--mono); font-size:10px; color:var(--ink-2); margin-top:4px; }
+
+  /* matriz QOC */
+  .qoc-wrap { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .qoc-block { background:var(--panel); border:1px solid var(--rule-2); padding:12px 14px; }
+  .qoc-p { font-family:var(--disp); font-weight:600; font-size:14px; margin-bottom:8px; }
+  table.qoc { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.qoc th { font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--ink-2); text-align:center; font-weight:400; padding:3px 4px; border-bottom:1px solid var(--rule); }
+  table.qoc th:first-child { text-align:left; }
+  table.qoc td { padding:5px 4px; border-bottom:1px solid var(--rule); }
+  table.qoc td.opt-name { font-family:var(--mono); font-size:11px; }
+  table.qoc td.sc { text-align:center; font-family:var(--disp); font-weight:600; font-variant-numeric:tabular-nums; }
+  table.qoc td.sc.na { color:var(--rule-2); font-weight:400; }
 
   footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule-2);
     font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-2); line-height:1.8; }
@@ -359,6 +427,13 @@ CASE_TEMPLATE = r"""<!doctype html>
   <div class="sec"><span class="no"></span><h2>Critérios de avaliação</h2><span class="line"></span></div>
   <ul class="cons">__CRITERIA__</ul>
   <p class="note" style="margin:10px 0 0">Premissas (placeholders, em <code>assumptions.yaml</code>): __ASSUMPTIONS__</p>
+
+  <div class="sec"><span class="no"></span><h2>Matriz QOC <span class="layer">opções × critérios</span></h2><span class="line"></span></div>
+  <div class="qoc-wrap">__QOCMATRIX__</div>
+
+  <div class="sec"><span class="no"></span><h2>Discussão &amp; argumentação <span class="layer">IBIS · Dung</span></h2><span class="line"></span></div>
+  <p class="lead">Argumentos pró/contra cada opção (camada IBIS). Setas de refutação formam um grafo; o motor calcula a <b>semântica grounded</b> (Dung) — quais argumentos sobrevivem ao debate. __IBIS_SUMMARY__</p>
+  <div class="ibis">__IBIS__</div>
 
   <div class="sec"><span class="no"></span><h2>Restrições registradas</h2><span class="line"></span></div>
   <ul class="cons">__CONS__</ul>
@@ -485,9 +560,13 @@ function renderEstimates(){
   cards.push(quantCard('Custo de capital', E.capex!=null ? fmtBRL(E.capex) : null, 'hardware + escala'));
   cards.push(quantCard('Potência', E.powerKw!=null ? (Math.round(E.powerKw*10)/10)+' kW' : null, 'selecione hardware + escala'));
   cards.push(quantCard('Energia', E.energy!=null ? (fmtBRL(E.energy)+'/mês') : null, 'depende da potência'));
+  var wsum=0, wtot=0;
   DATA.criteria.filter(function(c){ return c.kind==='qualitative'; }).forEach(function(c){
-    cards.push(qualCard(c.label, aggScore(c.id, E.scoreAgg[c.id])));
+    var v = aggScore(c.id, E.scoreAgg[c.id]);
+    cards.push(qualCard(c.label, v));
+    if (v!=null){ var w=c.weight||1; wsum+=v*w; wtot+=w; }
   });
+  if (wtot>0){ cards.push(qualCard('Índice QOC (ponderado)', wsum/wtot)); }
   box.innerHTML = '<div class="est-grid">'+cards.join('')+'</div>';
 }
 
@@ -621,6 +700,84 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
     q_txt = f"{q*100:.1f}%" if q is not None else "—"
     viable_txt = f'{cca["viable_configs"]:,}' if cca["enumerated"] else "—"
 
+    # --- Camada de discussão (IBIS) + argumentação (Dung) ---
+    args = case.get("arguments", []) or []
+    grounded = grounded_extension(args)
+    arg_by_id = {a["id"]: a for a in args if a.get("id")}
+    param_of_opt = {}
+    for p in case["parameters"]:
+        for o in p["options"]:
+            param_of_opt[o["id"]] = p
+    ST = {"in": ("aceito", "ok"), "out": ("derrotado", "hard"), "undecided": ("indeciso", "weak")}
+
+    def arg_html(a: dict) -> str:
+        sttxt, stcls = ST[grounded.get(a.get("id", ""), "undecided")]
+        stance = a.get("stance", "")
+        stance_txt = {"pro": "pró", "con": "contra"}.get(stance, stance)
+        by = a.get("by", "?")
+        prov = e(by) + (f" · {e(a['model'])}" if a.get("model") else "")
+        refuta = ""
+        atks = a.get("attacks") or []
+        if atks:
+            ref = "; ".join(
+                e((arg_by_id[x].get("claim", x)[:48] + "…")) if x in arg_by_id else e(x)
+                for x in atks
+            )
+            refuta = f'<div class="arg-ref">refuta: {ref}</div>'
+        return (
+            f'<div class="arg {stcls}"><span class="badge {stcls}">{e(sttxt)}</span> '
+            f'<span class="stance">{e(stance_txt)}</span> · <b>{e(label_for(case, a.get("target","")))}</b>'
+            f'<div class="claim">{e(a.get("claim",""))}</div>{refuta}'
+            f'<div class="arg-by">{prov}</div></div>'
+        )
+
+    ibis_html = ""
+    if args:
+        groups: dict = {}
+        for a in args:
+            p = param_of_opt.get(a.get("target"))
+            key = p["id"] if p else "_outros"
+            lbl = p["label"] if p else "Outros"
+            groups.setdefault(key, {"label": lbl, "items": []})["items"].append(a)
+        blocks = []
+        for g in groups.values():
+            blocks.append(
+                f'<div class="issue"><div class="issue-q">{e(g["label"])}</div>'
+                + "".join(arg_html(a) for a in g["items"])
+                + "</div>"
+            )
+        ibis_html = "".join(blocks)
+    n_in = sum(1 for v in grounded.values() if v == "in")
+    n_out = sum(1 for v in grounded.values() if v == "out")
+    ibis_summary = (
+        f"{len(args)} argumentos · <b style='color:var(--ok)'>{n_in} aceitos</b> · "
+        f"<b style='color:var(--signal)'>{n_out} derrotados</b> (semântica grounded de Dung)"
+        if args
+        else "Nenhum argumento registrado ainda."
+    )
+
+    # --- Matriz QOC (opções × critérios qualitativos) ---
+    qual_crit = [c for c in case.get("criteria", []) if c.get("kind") == "qualitative"]
+    qoc_html = ""
+    if qual_crit:
+        tables = []
+        head = "".join(f"<th>{e(c.get('label', c['id']))}</th>" for c in qual_crit)
+        for p in case["parameters"]:
+            rows_q = []
+            for o in p["options"]:
+                sc = o.get("scores", {}) or {}
+                cells = "".join(
+                    (f"<td class='sc'>{sc[c['id']]}</td>" if c["id"] in sc else "<td class='sc na'>·</td>")
+                    for c in qual_crit
+                )
+                rows_q.append(f"<tr><td class='opt-name'>{e(o.get('label', o['id']))}</td>{cells}</tr>")
+            tables.append(
+                f'<div class="qoc-block"><div class="qoc-p">{e(p["label"])}</div>'
+                f'<table class="qoc"><thead><tr><th></th>{head}</tr></thead>'
+                f'<tbody>{"".join(rows_q)}</tbody></table></div>'
+            )
+        qoc_html = "".join(tables)
+
     # Dados embutidos para a interatividade (sem depender de fetch; roda em file://).
     data = {
         "params": [
@@ -677,6 +834,9 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             "".join(criteria_html) or "<li>Nenhum critério definido ainda.</li>",
         )
         .replace("__ASSUMPTIONS__", assumptions_txt)
+        .replace("__IBIS_SUMMARY__", ibis_summary)
+        .replace("__IBIS__", ibis_html or "<p class='note'>Sem argumentos ainda — proponha um pró/contra.</p>")
+        .replace("__QOCMATRIX__", qoc_html or "<p class='note'>Sem critérios qualitativos ainda.</p>")
         .replace("__DATA_JSON__", data_json)
     )
 

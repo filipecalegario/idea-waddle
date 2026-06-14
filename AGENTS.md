@@ -64,6 +64,24 @@ Adquirir GPUs do mercado chinês (ex.: Huawei Ascend 910B).
 
 Esquemas detalhados de parâmetros, opções, restrições e argumentos estão exemplificados em [`02-fundamentos-teoricos.md`](docs/discovery/02-fundamentos-teoricos.md) (§A.4 e §B).
 
+### As quatro camadas (todas ativas no motor)
+1. **Solução — caixa morfológica + CCA** (`params/*.yaml`, `constraints.yaml`): opções e restrições; o motor poda configurações inviáveis.
+2. **Avaliação — QOC** (`criteria.yaml` + `scores`/`estimates` nas opções): critérios (com `weight` opcional) e a matriz opções × critérios; o site mostra um *Índice QOC* ponderado por configuração.
+3. **Discussão — IBIS** (`arguments.yaml`): cada parâmetro é uma Questão; suas opções são Posições; argumentos `pro`/`con` (com `target` numa opção) são os Pros/Cons.
+4. **Argumentação — Dung** (`attacks` em `arguments.yaml`): refutações entre argumentos formam um grafo; o motor calcula a **extensão grounded** (quais argumentos sobrevivem). Análogo argumentativo do CCA.
+
+Formato de `morphology/arguments.yaml`:
+```yaml
+arguments:
+  - id: arg.<slug>
+    target: opt.<param>.<slug>   # a opção (posição) sobre a qual argumenta
+    stance: pro | con
+    claim: "Afirmação curta."
+    by: "@usuario"               # ou agent:nome
+    model: "claude-opus-4-8"     # obrigatório se agente
+    attacks: [arg.<outro>]        # opcional: ids de argumentos que este refuta
+```
+
 **Validação automática (lint).** O padrão acima é verificado por [`engine/lint.py`](engine/lint.py), que roda na CI a cada PR (job `lint` em [`.github/workflows/build-site.yml`](.github/workflows/build-site.yml)). Rode localmente antes de abrir o PR:
 
 ```bash

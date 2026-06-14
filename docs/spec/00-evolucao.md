@@ -105,8 +105,14 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Kit de divulgação** no repo do caso: `.github/` com CODEOWNERS, pull_request_template e ISSUE_TEMPLATE (opção, restrição, parâmetro/critério, segunda opinião) + `ANNOUNCE.md` (textos curto/médio/e-mail + good first issues). O ato de divulgar (redes/e-mail) fica com o usuário.
 - **Pendente do usuário:** branch protection das `main` (require PR + Code Owners + check `lint`); divulgar de fato.
 
+### 2026-06-14 — Camadas IBIS + QOC (profunda) + Dung implementadas
+- **IBIS (discussão):** `morphology/arguments.yaml` — cada parâmetro é uma Questão; opções são Posições; argumentos `pro`/`con` com `target` numa opção. Site mostra a seção "Discussão & argumentação" agrupada por Questão, com proveniência.
+- **Dung (argumentação):** `attacks` entre argumentos formam um grafo; `grounded_extension()` no motor calcula quais argumentos sobrevivem (aceito/derrotado/indeciso). Demo: no caso da plataforma, o argumento "GitHub = lock-in/EUA" fica **derrotado** pelo de portabilidade.
+- **QOC profunda:** `weight` nos critérios; site renderiza a **Matriz QOC** (opções × critérios) e um **Índice QOC ponderado** por configuração no painel de estimativas.
+- **Motor/lint:** `cca.py` carrega `arguments.yaml`, computa grounded, renderiza as seções; `lint.py` valida argumentos (id único, stance pro/con, target/claim/by, ataques referenciam ids existentes, rastreabilidade). Dados de demo + pesos adicionados ao caso `idea-waddle-platform`. AGENTS.md documenta as quatro camadas. O caso CIn herda a capacidade via CI.
+
 ## Estado atual (snapshot)
-- **Fase:** chamada pública pronta para receber contribuições. Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
+- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
 - **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
 - **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.

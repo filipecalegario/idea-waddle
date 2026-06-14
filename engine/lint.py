@@ -196,6 +196,37 @@ def lint_case(case_dir: Path, rep: Report) -> None:
             elif is_agent(c.get("by")) and not c.get("model"):
                 rep.err(rel(cfile), f"{a}×{b}: contribuição de agente sem 'model'")
 
+    # 3b) argumentos (IBIS + Dung)
+    argfile = case_dir / "morphology" / "arguments.yaml"
+    if argfile.exists():
+        d = load_yaml(argfile, rep) or {}
+        arg_list = d.get("arguments", []) or []
+        arg_ids = set()
+        for a in arg_list:
+            aid = a.get("id")
+            if not aid:
+                rep.err(rel(argfile), "argumento sem id")
+                continue
+            if aid in arg_ids:
+                rep.err(rel(argfile), f"id de argumento duplicado: {aid}")
+            arg_ids.add(aid)
+            if a.get("stance") not in {"pro", "con"}:
+                rep.err(rel(argfile), f"{aid}: stance inválido (use pro|con)")
+            if not a.get("target"):
+                rep.err(rel(argfile), f"{aid}: target ausente")
+            elif a["target"] not in option_param:
+                rep.warn(rel(argfile), f"{aid}: target '{a['target']}' não é uma opção conhecida")
+            if not a.get("claim"):
+                rep.err(rel(argfile), f"{aid}: claim ausente")
+            if not a.get("by"):
+                rep.err(rel(argfile), f"{aid}: 'by' ausente (rastreabilidade)")
+            elif is_agent(a.get("by")) and not a.get("model"):
+                rep.err(rel(argfile), f"{aid}: contribuição de agente sem 'model'")
+        for a in arg_list:  # referências de ataque (depois de coletar todos os ids)
+            for tgt in a.get("attacks", []) or []:
+                if tgt not in arg_ids:
+                    rep.err(rel(argfile), f"{a.get('id')}: ataca argumento inexistente '{tgt}'")
+
     # 4) ciclos (linha do tempo)
     cyc = case_dir / "cycles"
     if cyc.is_dir():
