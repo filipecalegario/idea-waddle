@@ -3,6 +3,7 @@ parameter:
   label: "Interconexão de rede"
   description: "Tecnologia de rede entre nós (relevante a partir de múltiplos nós)."
   ibis_issue: null
+  # estimates.capex_fixed_brl entra como custo fixo no capex total. Placeholder a refinar.
   options:
     - id: opt.rede.ethernet
       label: "Ethernet (100GbE)"
@@ -10,15 +11,21 @@ parameter:
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Custo menor; suficiente p/ inferência sem tensor-parallel pesado entre nós."
+      estimates: { capex_fixed_brl: 60000 }
+      scores: { suporte: 4 }
     - id: opt.rede.roce
       label: "RoCE (RDMA over Converged Ethernet)"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Baixa latência sobre Ethernet; meio-termo de custo/performance."
+      estimates: { capex_fixed_brl: 150000 }
+      scores: { suporte: 3 }
     - id: opt.rede.infiniband
       label: "InfiniBand (NDR/HDR)"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Menor latência; fortemente associado ao ecossistema NVIDIA; mais caro."
+      estimates: { capex_fixed_brl: 450000 }
+      scores: { suporte: 4 }

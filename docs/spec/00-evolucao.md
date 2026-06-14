@@ -49,23 +49,32 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 
 ---
 
+### 2026-06-14 — Passo 1: camada QOC + estimativas de custo/energia
+- **Decisão (consulta ao usuário):** estimativas **híbridas** (quantitativo para capex/potência/energia com premissas documentadas e editáveis + escores qualitativos 1-5 para critérios moles) e **placeholders plausíveis semeados** (marcados como "a refinar").
+- **O que foi feito:**
+  - [`morphology/criteria.yaml`](../../cases/cin-ufpe-inference-cluster/morphology/criteria.yaml): 6 critérios (capex, potência, energia/mês — derivados; soberania, risco de fornecimento, suporte — qualitativos com agregação `min`).
+  - [`morphology/assumptions.yaml`](../../cases/cin-ufpe-inference-cluster/morphology/assumptions.yaml): premissas (tarifa R$/kWh, horas/mês, PUE) — placeholders.
+  - `estimates`/`scores` adicionados às opções (`params/*.yaml`).
+  - `engine/cca.py`: carrega critérios/premissas; o site agora exibe **Estimativas da configuração** (GPUs, capex, kW, R$/mês, escores com barra) recalculadas a cada seleção, + seção de Critérios (QOC) e premissas.
+- **Validação:** H100 ×32 + Ethernet → capex ≈ R$9,02M · 33,6 kW · R$22.982/mês (ordens de grandeza coerentes).
+
 ## Estado atual (snapshot)
-- **Fase:** fim do Discovery / início do protótipo. Ciclo **001 (abertura)** aberto, em modo *divergir*.
+- **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclo **001 (abertura)** aberto, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
-- **Camada ativa:** caixa morfológica + CCA + site vivo interativo. Camadas IBIS/QOC/Dung: ganchos prontos, ainda não implementadas.
+- **Camada ativa:** caixa morfológica + CCA + **camada QOC (critérios + estimativas)** no site vivo interativo. Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
 - **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) para o site ir ao ar.
 
 ## Decisões em aberto
 (ver detalhes em [`/docs/discovery/04-perguntas-provocacoes.md`](../discovery/04-perguntas-provocacoes.md))
 - **Substrato:** GitHub (preferência atual) vs. GitLab self-hosted (soberania de dados p/ UFPE).
 - **Política de diversidade operacional:** quorum de modelos? cotas humano:agente por ciclo? como medir diversidade?
-- **Critérios de avaliação (QOC) e estimativas quantitativas** (custo de capital, kW, R$/mês, prazo, risco de fornecimento) por configuração.
+- **Refinar os placeholders** de estimativas/escores com números pesquisados/medidos (tarifa real de PE/UFPE, preços de GPU, PUE).
 - **Governança:** rate-limiting de agentes, identidade verificável, fronteira do que só humanos podem fazer.
 - **Entregável final p/ a diretoria:** um caminho recomendado vs. N caminhos com trade-offs.
 - **Build vs. fork** de Talk to the City / Log4brains.
 
 ## Próximos passos candidatos
-1. Acoplar a **camada de critérios (QOC) + estimativas** de custo/energia por configuração.
+1. ✅ ~~Acoplar a **camada de critérios (QOC) + estimativas** de custo/energia por configuração.~~ (feito 2026-06-14)
 2. Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.
 3. Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).
 4. Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.

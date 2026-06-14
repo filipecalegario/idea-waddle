@@ -51,7 +51,25 @@ def load_case(case_dir: Path) -> dict:
         cdata = yaml.safe_load(cfile.read_text(encoding="utf-8")) or {}
         constraints = cdata.get("constraints", []) or []
 
-    return {"id": case_dir.name, "parameters": params, "constraints": constraints}
+    criteria = []
+    crfile = case_dir / "morphology" / "criteria.yaml"
+    if crfile.exists():
+        crdata = yaml.safe_load(crfile.read_text(encoding="utf-8")) or {}
+        criteria = crdata.get("criteria", []) or []
+
+    assumptions = {}
+    afile = case_dir / "morphology" / "assumptions.yaml"
+    if afile.exists():
+        adata = yaml.safe_load(afile.read_text(encoding="utf-8")) or {}
+        assumptions = adata.get("assumptions", {}) or {}
+
+    return {
+        "id": case_dir.name,
+        "parameters": params,
+        "constraints": constraints,
+        "criteria": criteria,
+        "assumptions": assumptions,
+    }
 
 
 def compute_cca(case: dict) -> dict:
@@ -173,6 +191,16 @@ CASE_TEMPLATE = r"""<!doctype html>
   .badge.weak { background:rgba(224,175,104,.18); color:var(--weak); }
   .space { margin-top:10px; font-size:13px; }
   .space b { color:var(--ok); }
+  .estpanel { margin-top:14px; }
+  .est-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .est { background:#12151d; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  .est .k { color:var(--mut); font-size:12px; }
+  .est .v { font-size:19px; color:var(--acc); margin-top:2px; }
+  .est.qual .v { color:var(--ok); }
+  .est .miss { color:var(--mut); font-size:13px; }
+  .est .bar { height:6px; border-radius:4px; background:var(--line); margin-top:6px; overflow:hidden; }
+  .est .bar > i { display:block; height:100%; background:var(--ok); }
+  .est small { color:var(--mut); display:block; margin-top:3px; }
   .btn { background:#222633; color:var(--txt); border:1px solid var(--line); border-radius:7px;
          padding:6px 12px; cursor:pointer; font-size:13px; }
   .btn:hover { border-color:var(--acc); }
@@ -216,6 +244,17 @@ CASE_TEMPLATE = r"""<!doctype html>
     </div>
   </div>
 
+  <div class="panel estpanel">
+    <h3>Estimativas da configuração (QOC)</h3>
+    <div class="hint" style="margin:0 0 10px">Números são <b>placeholders a refinar</b> (premissas editáveis em
+      <code>assumptions.yaml</code>; valores por opção em <code>params/*.yaml</code>). Tratar como ordem de grandeza.</div>
+    <div id="estimates"><div class="empty">Selecione opções para estimar custo, potência e energia.</div></div>
+  </div>
+
+  <h2>Critérios de avaliação (QOC)</h2>
+  <ul class="cons">__CRITERIA__</ul>
+  <div class="hint">Premissas (placeholders, editáveis em <code>assumptions.yaml</code>): __ASSUMPTIONS__</div>
+
   <h2>Todas as restrições (referência)</h2>
   <ul class="cons">__CONS__</ul>
 
@@ -231,7 +270,8 @@ const DATA = __DATA_JSON__;
 const OPT = {};            // optId -> {label, rationale, by, model, param, paramLabel}
 DATA.params.forEach(function(p){
   p.options.forEach(function(o){
-    OPT[o.id] = {label:o.label, rationale:o.rationale, by:o.by, model:o.model, param:p.id, paramLabel:p.label};
+    OPT[o.id] = {label:o.label, rationale:o.rationale, by:o.by, model:o.model,
+                 param:p.id, paramLabel:p.label, estimates:o.estimates||{}, scores:o.scores||{}};
   });
 });
 function findConstraint(x, y){
@@ -282,6 +322,65 @@ function recompute(){
   renderSelection(selIds);
   renderRestrictions(selIds);
   renderSpace();
+  renderEstimates();
+}
+
+// ---- camada QOC: estimativas de custo/energia + escores ----
+function critById(id){
+  for (var i=0;i<DATA.criteria.length;i++){ if (DATA.criteria[i].id===id) return DATA.criteria[i]; }
+  return {};
+}
+function aggScore(id, vals){
+  if (!vals || !vals.length) return null;
+  var agg = (critById(id).aggregation) || 'min';
+  if (agg==='avg') return vals.reduce(function(a,b){return a+b;},0)/vals.length;
+  if (agg==='sum') return vals.reduce(function(a,b){return a+b;},0);
+  return Math.min.apply(null, vals);
+}
+function computeEstimates(){
+  var A = DATA.assumptions || {};
+  var gpus=null, capexPerGpu=null, tdp=null, capexFixed=0;
+  var scoreAgg = {};
+  Object.keys(selected).forEach(function(pid){
+    var o = OPT[selected[pid]], est = o.estimates||{}, sc = o.scores||{};
+    if (est.n_gpus!=null) gpus = est.n_gpus;
+    if (est.capex_per_gpu_brl!=null) capexPerGpu = est.capex_per_gpu_brl;
+    if (est.tdp_w_per_gpu!=null) tdp = est.tdp_w_per_gpu;
+    if (est.capex_fixed_brl!=null) capexFixed += est.capex_fixed_brl;
+    Object.keys(sc).forEach(function(k){ (scoreAgg[k]=scoreAgg[k]||[]).push(sc[k]); });
+  });
+  var capex = (gpus!=null && capexPerGpu!=null) ? gpus*capexPerGpu + capexFixed : null;
+  var powerKw = (gpus!=null && tdp!=null && A.pue!=null) ? gpus*tdp/1000*A.pue : null;
+  var energy = (powerKw!=null && A.hours_per_month!=null && A.tariff_brl_per_kwh!=null)
+      ? powerKw*A.hours_per_month*A.tariff_brl_per_kwh : null;
+  return {gpus:gpus, capex:capex, powerKw:powerKw, energy:energy, scoreAgg:scoreAgg};
+}
+function fmtBRL(n){ return 'R$ ' + Math.round(n).toLocaleString('pt-BR'); }
+function quantCard(k, v, miss){
+  var inner = (v!=null) ? '<div class="v">'+v+'</div>' : '<div class="miss">'+ (miss||'—') +'</div>';
+  return '<div class="est"><div class="k">'+esc(k)+'</div>'+inner+'</div>';
+}
+function qualCard(k, v){
+  if (v==null) return '<div class="est qual"><div class="k">'+esc(k)+'</div><div class="miss">—</div></div>';
+  var pct = Math.max(0, Math.min(100, (v/5)*100));
+  return '<div class="est qual"><div class="k">'+esc(k)+'</div>'+
+         '<div class="v">'+ (Math.round(v*10)/10) +' <small style="display:inline">/5</small></div>'+
+         '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+}
+function renderEstimates(){
+  var box = document.getElementById('estimates');
+  if (!Object.keys(selected).length){
+    box.innerHTML = '<div class="empty">Selecione opções para estimar custo, potência e energia.</div>'; return;
+  }
+  var E = computeEstimates(), cards = [];
+  cards.push(quantCard('Total de GPUs', E.gpus!=null ? E.gpus.toLocaleString('pt-BR') : null, 'selecione a escala'));
+  cards.push(quantCard('Custo de capital', E.capex!=null ? fmtBRL(E.capex) : null, 'selecione hardware + escala'));
+  cards.push(quantCard('Potência', E.powerKw!=null ? (Math.round(E.powerKw*10)/10)+' kW' : null, 'selecione hardware + escala'));
+  cards.push(quantCard('Energia', E.energy!=null ? (fmtBRL(E.energy)+'/mês') : null, 'depende da potência'));
+  DATA.criteria.filter(function(c){ return c.kind==='qualitative'; }).forEach(function(c){
+    cards.push(qualCard(c.label, aggScore(c.id, E.scoreAgg[c.id])));
+  });
+  box.innerHTML = '<div class="est-grid">'+cards.join('')+'</div>';
 }
 
 function renderSelection(selIds){
@@ -383,6 +482,28 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             f'<i>({e(c.get("by","?"))}{(" · " + e(c["model"])) if c.get("model") else ""})</i></small></li>'
         )
 
+    criteria_html = []
+    for cr in case.get("criteria", []):
+        kind = cr.get("kind", "")
+        extra = cr.get("unit") or cr.get("scale") or ""
+        meta = " · ".join(x for x in [kind, cr.get("direction", ""), extra] if x)
+        criteria_html.append(
+            f'<li><b>{e(cr.get("label", cr.get("id","")))}</b> '
+            f'<span class="ctype">{e(meta)}</span>'
+            + (f'<br><small>{e(cr.get("note",""))}</small>' if cr.get("note") else "")
+            + "</li>"
+        )
+
+    a = case.get("assumptions", {})
+    assumptions_parts = []
+    if a.get("tariff_brl_per_kwh") is not None:
+        assumptions_parts.append(f'tarifa R$ {a["tariff_brl_per_kwh"]}/kWh')
+    if a.get("hours_per_month") is not None:
+        assumptions_parts.append(f'{a["hours_per_month"]} h/mês')
+    if a.get("pue") is not None:
+        assumptions_parts.append(f'PUE {a["pue"]}')
+    assumptions_txt = e(" · ".join(assumptions_parts)) or "—"
+
     q = cca["quotient"]
     q_txt = f"{q*100:.1f}%" if q is not None else "—"
     viable_txt = f'{cca["viable_configs"]:,}' if cca["enumerated"] else "—"
@@ -400,6 +521,8 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
                         "rationale": o.get("rationale", ""),
                         "by": o.get("proposed_by", ""),
                         "model": o.get("model", ""),
+                        "estimates": o.get("estimates", {}) or {},
+                        "scores": o.get("scores", {}) or {},
                     }
                     for o in p["options"]
                 ],
@@ -418,6 +541,8 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             }
             for c in case["constraints"]
         ],
+        "criteria": case.get("criteria", []),
+        "assumptions": case.get("assumptions", {}),
     }
     data_json = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
@@ -434,6 +559,11 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             "__CONS__",
             "".join(constraints_html) or "<li>Nenhuma restrição ainda.</li>",
         )
+        .replace(
+            "__CRITERIA__",
+            "".join(criteria_html) or "<li>Nenhum critério definido ainda.</li>",
+        )
+        .replace("__ASSUMPTIONS__", assumptions_txt)
         .replace("__DATA_JSON__", data_json)
     )
 

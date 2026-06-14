@@ -1,0 +1,55 @@
+# Critérios de avaliação (camada QOC — Questions/Options/Criteria).
+# Cada configuração da caixa morfológica é avaliada por estes critérios.
+#   kind:        quantitative | qualitative
+#   direction:   minimize | maximize  (o que é "melhor")
+#   aggregation: sum | min | avg | derived
+#     - sum/min/avg: agrega as contribuições das opções selecionadas
+#     - derived: calculado pelo motor a partir de estimates + assumptions.yaml
+# Critérios quantitativos derivam dos campos 'estimates' das opções (ver params/*.yaml)
+# e das constantes em assumptions.yaml. Qualitativos derivam dos 'scores' (1-5).
+criteria:
+  - id: capex
+    label: "Custo de capital (R$)"
+    kind: quantitative
+    unit: "R$"
+    direction: minimize
+    aggregation: derived
+    note: "≈ n_gpus × capex_por_gpu + capex_fixo (rede etc.)."
+
+  - id: power
+    label: "Potência elétrica (kW)"
+    kind: quantitative
+    unit: "kW"
+    direction: minimize
+    aggregation: derived
+    note: "≈ n_gpus × TDP_por_gpu × PUE."
+
+  - id: energy_month
+    label: "Energia (R$/mês)"
+    kind: quantitative
+    unit: "R$/mês"
+    direction: minimize
+    aggregation: derived
+    note: "≈ potência(kW) × horas/mês × tarifa(R$/kWh)."
+
+  - id: soberania
+    label: "Soberania (dados/fornecimento)"
+    kind: qualitative
+    scale: "1-5 (maior = mais soberano)"
+    direction: maximize
+    aggregation: min
+    note: "Elo mais fraco define o conjunto (min)."
+
+  - id: risco_fornecimento
+    label: "Baixo risco de fornecimento"
+    kind: qualitative
+    scale: "1-5 (maior = menor risco)"
+    direction: maximize
+    aggregation: min
+
+  - id: suporte
+    label: "Suporte / manutenção"
+    kind: qualitative
+    scale: "1-5 (maior = melhor)"
+    direction: maximize
+    aggregation: min

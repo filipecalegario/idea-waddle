@@ -1,0 +1,9 @@
+# Premissas (constantes) usadas pelos critérios quantitativos derivados.
+# PLACEHOLDERS iniciais — a refinar pela comunidade via PR (proveniência: agent:discovery).
+assumptions:
+  tariff_brl_per_kwh: 0.95   # tarifa média de energia (R$/kWh) — refinar p/ realidade de PE/UFPE
+  hours_per_month: 720       # 24h × 30 dias (operação contínua)
+  pue: 1.5                   # Power Usage Effectiveness (overhead de refrigeração/infra)
+  note: >
+    Valores de partida para o mecanismo funcionar de ponta a ponta.
+    Devem ser substituídos por números pesquisados/medidos. Ver docs/discovery/02 e 04.

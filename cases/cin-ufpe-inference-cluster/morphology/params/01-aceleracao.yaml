@@ -4,6 +4,8 @@ parameter:
   description: "Que acelerador(es) formam a base do cluster de inferência."
   # Gancho p/ camadas futuras (IBIS/QOC): id da Issue/Questão associada.
   ibis_issue: null
+  # estimates/scores são PLACEHOLDERS a refinar (proveniência agent:discovery).
+  # estimates.capex_per_gpu_brl e tdp_w_per_gpu são multiplicados por n_gpus (ver 04-escala).
   options:
     - id: opt.aceleracao.h100
       label: "NVIDIA H100 / H200 (data center, topo)"
@@ -11,21 +13,29 @@ parameter:
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Ecossistema CUDA maduro; melhor suporte de software de serving."
+      estimates: { capex_per_gpu_brl: 280000, tdp_w_per_gpu: 700 }
+      scores: { soberania: 2, risco_fornecimento: 3, suporte: 5 }
     - id: opt.aceleracao.l40s
       label: "NVIDIA L40S / RTX 6000 Ada (custo-benefício)"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Menor custo por placa; boa p/ inferência de modelos médios."
+      estimates: { capex_per_gpu_brl: 90000, tdp_w_per_gpu: 350 }
+      scores: { soberania: 2, risco_fornecimento: 4, suporte: 5 }
     - id: opt.aceleracao.mi300
       label: "AMD Instinct MI300X"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Alta VRAM (192GB); alternativa ao monopólio NVIDIA; ROCm amadurecendo."
+      estimates: { capex_per_gpu_brl: 200000, tdp_w_per_gpu: 750 }
+      scores: { soberania: 2, risco_fornecimento: 3, suporte: 3 }
     - id: opt.aceleracao.ascend
       label: "Huawei Ascend 910B"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
       status: proposed
       rationale: "Opção do mercado chinês; relevante diante de restrições de exportação."
+      estimates: { capex_per_gpu_brl: 130000, tdp_w_per_gpu: 400 }
+      scores: { soberania: 3, risco_fornecimento: 2, suporte: 2 }
