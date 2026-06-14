@@ -1,0 +1,8 @@
+# Site gerado pelo motor (publicado pela CI; não precisa versionar)
+/site/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

@@ -1,0 +1,30 @@
+parameter:
+  id: serving
+  label: "Software de serving (inferência)"
+  description: "Stack que serve os modelos para a comunidade."
+  ibis_issue: null
+  options:
+    - id: opt.serving.vllm
+      label: "vLLM"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Alto throughput (PagedAttention); amplo suporte a modelos; open-source."
+    - id: opt.serving.sglang
+      label: "SGLang"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Forte em workloads estruturados/agênticos; performático."
+    - id: opt.serving.tensorrt
+      label: "TensorRT-LLM"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Máxima performance em NVIDIA; acoplado ao ecossistema NVIDIA."
+    - id: opt.serving.ollama
+      label: "Ollama"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Simplicidade de operação; menos otimizado p/ alta concorrência."

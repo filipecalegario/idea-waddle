@@ -1,0 +1,62 @@
+# Cross-Consistency Assessment (CCA)
+# Cada restrição relaciona DUAS opções de parâmetros DIFERENTES.
+#   type:   logical | empirical | normative   (ver docs/discovery/02-fundamentos-teoricos.md §A.2)
+#   degree: incompatible | weak | ok
+# Apenas 'incompatible' poda configurações. 'weak' fica registrado p/ alerta (não poda ainda).
+# Restrições podem ser contestadas via argumento (camada futura).
+constraints:
+  - a: opt.serving.tensorrt
+    b: opt.aceleracao.mi300
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "TensorRT-LLM é específico de GPUs NVIDIA; não roda em AMD MI300X."
+
+  - a: opt.serving.tensorrt
+    b: opt.aceleracao.ascend
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "TensorRT-LLM é específico de NVIDIA; não roda em Huawei Ascend."
+
+  - a: opt.aceleracao.ascend
+    b: opt.fornecimento.us
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Huawei Ascend não é fornecido pelo mercado americano."
+
+  - a: opt.rede.infiniband
+    b: opt.aceleracao.ascend
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "InfiniBand (NVIDIA/Mellanox) não integra ao stack Ascend de forma suportada."
+
+  - a: opt.rede.infiniband
+    b: opt.escala.no_unico
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Interconexão entre nós é irrelevante num nó único; InfiniBand não se aplica."
+
+  - a: opt.rede.roce
+    b: opt.escala.no_unico
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "RoCE entre nós não se aplica a um nó único."
+
+  - a: opt.aceleracao.ascend
+    b: opt.serving.ollama
+    type: empirical
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Suporte de Ollama a Ascend é limitado/imaturo — alerta, não poda."

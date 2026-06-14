@@ -1,0 +1,24 @@
+parameter:
+  id: acesso
+  label: "Modelo de acesso da comunidade"
+  description: "Como a comunidade universitária consome a inferência."
+  ibis_issue: null
+  options:
+    - id: opt.acesso.api
+      label: "API compatível com OpenAI (interna)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Integra com ferramentas existentes; bom p/ pesquisa e apps."
+    - id: opt.acesso.chat
+      label: "Interface web de chat"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Acesso fácil p/ usuários não-técnicos da comunidade."
+    - id: opt.acesso.ambos
+      label: "API + chat (ambos)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Cobre pesquisadores e usuários finais; mais superfície a manter."

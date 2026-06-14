@@ -1,0 +1,24 @@
+parameter:
+  id: fornecimento
+  label: "Origem de fornecimento"
+  description: "De qual mercado/cadeia as placas e o suporte viriam."
+  ibis_issue: null
+  options:
+    - id: opt.fornecimento.us
+      label: "Mercado americano (NVIDIA/AMD via distribuidor)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Ecossistema e suporte consolidados; sujeito a câmbio e prazos de importação."
+    - id: opt.fornecimento.cn
+      label: "Mercado chinês (Huawei/Biren)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Possível custo menor; incerteza de suporte/garantia local e de software."
+    - id: opt.fornecimento.parceria
+      label: "Parceria / doação de fabricante ou nuvem"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Reduz custo de capital; depende de negociação e pode amarrar a um fornecedor."

@@ -1,0 +1,24 @@
+parameter:
+  id: escala
+  label: "Escala inicial"
+  description: "Tamanho do investimento inicial do cluster de inferência."
+  ibis_issue: null
+  options:
+    - id: opt.escala.no_unico
+      label: "Nó único multi-GPU (4–8 GPUs)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Menor custo de entrada; bom p/ piloto e aprendizado operacional."
+    - id: opt.escala.pequeno
+      label: "Cluster pequeno (2–4 nós)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Permite estudar interconexão e escalonamento de inferência."
+    - id: opt.escala.medio
+      label: "Cluster médio (8+ nós)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Atende demanda ampla da comunidade; exige rede e refrigeração robustas."

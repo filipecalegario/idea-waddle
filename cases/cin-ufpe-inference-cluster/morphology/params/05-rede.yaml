@@ -1,0 +1,24 @@
+parameter:
+  id: rede
+  label: "Interconexão de rede"
+  description: "Tecnologia de rede entre nós (relevante a partir de múltiplos nós)."
+  ibis_issue: null
+  options:
+    - id: opt.rede.ethernet
+      label: "Ethernet (100GbE)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Custo menor; suficiente p/ inferência sem tensor-parallel pesado entre nós."
+    - id: opt.rede.roce
+      label: "RoCE (RDMA over Converged Ethernet)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Baixa latência sobre Ethernet; meio-termo de custo/performance."
+    - id: opt.rede.infiniband
+      label: "InfiniBand (NDR/HDR)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Menor latência; fortemente associado ao ecossistema NVIDIA; mais caro."
