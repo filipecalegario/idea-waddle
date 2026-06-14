@@ -45,6 +45,7 @@ O protocolo de colaboração — como propor uma ideia, como bifurcar (*fork*) e
 
 ## Documentação
 
+- **[`docs/spec/00-evolucao.md`](docs/spec/00-evolucao.md)** — **registro vivo da evolução do projeto** (linha do tempo de decisões, estado atual, o que está em aberto). Comece por aqui para retomar o fio da meada.
 - **[`docs/discovery/`](docs/discovery/)** — pesquisa de fundamentação e artefatos de decisão desta fase:
   - [`00-indice.md`](docs/discovery/00-indice.md) — índice e sumário executivo
   - [`01-prior-art.md`](docs/discovery/01-prior-art.md) — o que já existe (Git + colaboração criativa humano-agente)

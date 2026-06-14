@@ -116,7 +116,244 @@ def e(s) -> str:
     return html.escape(str(s))
 
 
+CASE_TEMPLATE = r"""<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>idea-waddle — __CASE_ID__</title>
+<style>
+  :root { --bg:#0f1117; --card:#1a1d27; --line:#2a2e3c; --txt:#e6e8ee; --mut:#9aa0b0;
+          --acc:#7aa2f7; --hard:#f7768e; --weak:#e0af68; --ok:#9ece6a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.5 system-ui,sans-serif; }
+  .wrap { max-width:1180px; margin:0 auto; padding:24px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  .sub { color:var(--mut); margin-bottom:20px; }
+  .stats { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0 22px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; min-width:128px; }
+  .stat b { display:block; font-size:22px; color:var(--acc); }
+  .stat span { color:var(--mut); font-size:12px; }
+  h2 { font-size:16px; margin:26px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .hint { color:var(--mut); font-size:13px; margin:-4px 0 12px; }
+
+  /* Caixa morfológica no padrão GMA: cada LINHA é um parâmetro; células = opções. */
+  .gma { border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .row { display:flex; align-items:stretch; border-bottom:1px solid var(--line); }
+  .row:last-child { border-bottom:0; }
+  .row-label { flex:0 0 175px; background:#222633; padding:12px; font-weight:600; font-size:13px;
+               display:flex; align-items:center; border-right:1px solid var(--line); }
+  .row-cells { flex:1; display:flex; flex-wrap:wrap; gap:8px; padding:10px; }
+  .opt { flex:1 1 150px; min-width:140px; background:#12151d; border:1px solid var(--line);
+         border-radius:8px; padding:8px 10px; cursor:pointer; transition:.12s; user-select:none; }
+  .opt:hover { border-color:var(--acc); }
+  .opt-label { display:block; font-size:13px; }
+  .prov { display:block; color:var(--mut); font-size:11px; margin-top:3px; }
+  .opt.selected { border-color:var(--acc); background:rgba(122,162,247,.16); box-shadow:0 0 0 1px var(--acc) inset; }
+  .opt.blocked { opacity:.45; border-color:var(--hard); border-style:dashed; cursor:not-allowed; }
+  .opt.blocked .opt-label { text-decoration:line-through; }
+  .opt.warn { border-color:var(--weak); }
+  .opt.flash { animation:flash .5s; }
+  @keyframes flash { 0%,100%{background:#12151d;} 30%{background:rgba(247,118,142,.30);} }
+
+  .panels { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  @media (max-width:760px){ .panels{ grid-template-columns:1fr; } .row{ flex-direction:column; } .row-label{ flex-basis:auto; border-right:0; border-bottom:1px solid var(--line);} }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .panel h3 { margin:0 0 10px; font-size:14px; }
+  .panel .empty { color:var(--mut); font-size:13px; }
+  .selitem { border-left:3px solid var(--acc); padding:4px 0 4px 10px; margin-bottom:10px; }
+  .selitem .p { color:var(--mut); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .selitem .l { font-size:14px; }
+  .selitem .r { color:var(--mut); font-size:12px; margin-top:2px; }
+  .selitem .by { color:var(--mut); font-size:11px; margin-top:3px; font-style:italic; }
+  .cline { border-left:3px solid var(--line); padding:6px 0 6px 10px; margin-bottom:9px; font-size:13px; }
+  .cline.hard { border-left-color:var(--hard); }
+  .cline.weak { border-left-color:var(--weak); }
+  .cline small { color:var(--mut); display:block; margin-top:2px; }
+  .badge { font-size:11px; padding:1px 7px; border-radius:20px; }
+  .badge.hard { background:rgba(247,118,142,.18); color:var(--hard); }
+  .badge.weak { background:rgba(224,175,104,.18); color:var(--weak); }
+  .space { margin-top:10px; font-size:13px; }
+  .space b { color:var(--ok); }
+  .btn { background:#222633; color:var(--txt); border:1px solid var(--line); border-radius:7px;
+         padding:6px 12px; cursor:pointer; font-size:13px; }
+  .btn:hover { border-color:var(--acc); }
+  ul.cons { list-style:none; padding:0; }
+  ul.cons li { background:var(--card); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:9px 12px; margin-bottom:8px; }
+  ul.cons li.hard { border-left-color:var(--hard); }
+  ul.cons li.weak { border-left-color:var(--weak); }
+  .ctype { color:var(--mut); font-size:12px; }
+  .cons small { color:var(--mut); }
+  footer { color:var(--mut); font-size:12px; margin-top:32px; border-top:1px solid var(--line); padding-top:12px; }
+  a { color:var(--acc); }
+</style></head>
+<body><div class="wrap">
+  <h1>Caixa morfológica viva — __CASE_ID__</h1>
+  <div class="sub">Plataforma <b>idea-waddle</b> · colaboração criativa humano + agente sobre Git ·
+    gerado em __GENERATED__</div>
+
+  <div class="stats">
+    <div class="stat"><b>__N_PARAMS__</b><span>parâmetros</span></div>
+    <div class="stat"><b>__TOTAL__</b><span>configurações totais</span></div>
+    <div class="stat"><b>__N_HARD__</b><span>restrições (poda)</span></div>
+    <div class="stat"><b>__VIABLE__</b><span>configurações viáveis</span></div>
+    <div class="stat"><b>__QUOTIENT__</b><span>espaço de solução</span></div>
+  </div>
+
+  <h2>Explorar a caixa morfológica</h2>
+  <div class="hint">Clique numa célula por linha para montar uma configuração. As opções
+    <b style="color:var(--hard)">incompatíveis</b> com a sua seleção ficam bloqueadas; as
+    <b style="color:var(--weak)">fracas</b> (alerta) seguem selecionáveis. Cada seleção mostra o comentário da célula e os caminhos de restrição ativados.</div>
+  <div class="gma" id="gma">__ROWS__</div>
+
+  <div class="panels">
+    <div class="panel">
+      <h3>Seleção atual <button class="btn" id="clear" style="float:right">Limpar</button></h3>
+      <div id="selection"><div class="empty">Nenhuma célula selecionada.</div></div>
+      <div class="space" id="space"></div>
+    </div>
+    <div class="panel">
+      <h3>Caminhos de restrição ativos</h3>
+      <div id="restrictions"><div class="empty">Selecione células para ver as restrições disparadas.</div></div>
+    </div>
+  </div>
+
+  <h2>Todas as restrições (referência)</h2>
+  <ul class="cons">__CONS__</ul>
+
+  <footer>
+    Proveniência registrada por opção/restrição (quem · qual modelo). Diversidade é princípio do projeto —
+    veja o <code>README.md</code>, o <code>AGENTS.md</code> e <code>docs/discovery/</code>.
+    Restrições <span class="badge weak">weak</span> alertam mas não podam.
+  </footer>
+</div>
+<script>
+const DATA = __DATA_JSON__;
+// índices auxiliares
+const OPT = {};            // optId -> {label, rationale, by, model, param, paramLabel}
+DATA.params.forEach(function(p){
+  p.options.forEach(function(o){
+    OPT[o.id] = {label:o.label, rationale:o.rationale, by:o.by, model:o.model, param:p.id, paramLabel:p.label};
+  });
+});
+function findConstraint(x, y){
+  for (var i=0;i<DATA.constraints.length;i++){
+    var c = DATA.constraints[i];
+    if ((c.a===x && c.b===y) || (c.a===y && c.b===x)) return c;
+  }
+  return null;
+}
+const selected = {};       // paramId -> optId
+
+function hardFree(ids){
+  for (var i=0;i<DATA.constraints.length;i++){
+    var c = DATA.constraints[i];
+    if (c.degree==='incompatible' && ids.indexOf(c.a)>-1 && ids.indexOf(c.b)>-1) return false;
+  }
+  return true;
+}
+function countViable(partial){
+  var ps = DATA.params, count = 0;
+  function rec(i, chosen){
+    if (i===ps.length){ if (hardFree(chosen)) count++; return; }
+    var p = ps[i];
+    if (partial[p.id]) rec(i+1, chosen.concat(partial[p.id]));
+    else p.options.forEach(function(o){ rec(i+1, chosen.concat(o.id)); });
+  }
+  rec(0, []);
+  return count;
+}
+
+function recompute(){
+  var selIds = Object.keys(selected).map(function(k){ return selected[k]; });
+  document.querySelectorAll('.opt').forEach(function(el){
+    var id = el.dataset.opt, p = el.dataset.param;
+    el.classList.remove('selected','blocked','warn');
+    if (selected[p]===id){ el.classList.add('selected'); return; }
+    var blocked=false, warn=false;
+    for (var i=0;i<selIds.length;i++){
+      var s = selIds[i];
+      if (OPT[s].param===p) continue;            // mesma linha não conflita
+      var c = findConstraint(id, s);
+      if (c && c.degree==='incompatible'){ blocked=true; break; }
+      if (c && c.degree==='weak') warn=true;
+    }
+    if (blocked) el.classList.add('blocked');
+    else if (warn) el.classList.add('warn');
+  });
+  renderSelection(selIds);
+  renderRestrictions(selIds);
+  renderSpace();
+}
+
+function renderSelection(selIds){
+  var box = document.getElementById('selection');
+  if (!selIds.length){ box.innerHTML = '<div class="empty">Nenhuma célula selecionada.</div>'; return; }
+  box.innerHTML = DATA.params.filter(function(p){ return selected[p.id]; }).map(function(p){
+    var o = OPT[selected[p.id]];
+    var by = o.by ? (o.by + (o.model ? ' · ' + o.model : '')) : '';
+    return '<div class="selitem"><div class="p">'+esc(p.label)+'</div>'+
+           '<div class="l">'+esc(o.label)+'</div>'+
+           (o.rationale ? '<div class="r">'+esc(o.rationale)+'</div>' : '')+
+           (by ? '<div class="by">'+esc(by)+'</div>' : '')+'</div>';
+  }).join('');
+}
+
+function renderRestrictions(selIds){
+  var box = document.getElementById('restrictions');
+  var lines = [];
+  DATA.constraints.forEach(function(c){
+    var aSel = selIds.indexOf(c.a)>-1, bSel = selIds.indexOf(c.b)>-1;
+    if (!aSel && !bSel) return;                  // só mostra restrições tocadas pela seleção
+    var cls = c.degree==='incompatible' ? 'hard' : 'weak';
+    var verb;
+    if (aSel && bSel) verb = (cls==='hard' ? 'CONFLITO direto' : 'alerta entre selecionadas');
+    else verb = (cls==='hard' ? 'bloqueia' : 'alerta sobre');
+    var other = aSel ? c.b : c.a, picked = aSel ? c.a : c.b;
+    var headline = (aSel && bSel)
+        ? esc(OPT[c.a].label)+' ✕ '+esc(OPT[c.b].label)
+        : esc(OPT[picked].label)+' → '+verb+' → '+esc(OPT[other].label);
+    lines.push('<div class="cline '+cls+'"><span class="badge '+cls+'">'+esc(c.degree)+'</span> '+
+               '<span class="ctype">'+esc(c.type||'')+'</span> — '+headline+
+               '<small>'+esc(c.note||'')+'</small></div>');
+  });
+  box.innerHTML = lines.length ? lines.join('') :
+    '<div class="empty">Nenhuma restrição disparada por esta seleção.</div>';
+}
+
+function renderSpace(){
+  var n = countViable(selected);
+  var picked = Object.keys(selected).length;
+  document.getElementById('space').innerHTML =
+    'Configurações viáveis compatíveis com a seleção ('+picked+'/'+DATA.params.length+' linhas): <b>'+
+    n.toLocaleString('pt-BR')+'</b>';
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+document.querySelectorAll('.opt').forEach(function(el){
+  el.addEventListener('click', function(){
+    var id = el.dataset.opt, p = el.dataset.param;
+    if (el.classList.contains('blocked')){
+      el.classList.add('flash');
+      setTimeout(function(){ el.classList.remove('flash'); }, 500);
+      return;
+    }
+    if (selected[p]===id) delete selected[p];   // clicar de novo deseleciona
+    else selected[p] = id;
+    recompute();
+  });
+});
+document.getElementById('clear').addEventListener('click', function(){
+  Object.keys(selected).forEach(function(k){ delete selected[k]; });
+  recompute();
+});
+recompute();
+</script>
+</body></html>"""
+
+
 def render_case_html(case: dict, cca: dict, generated: str) -> str:
+    # Linhas no padrão GMA: cada parâmetro é uma linha; opções são as células.
     rows = []
     for p in case["parameters"]:
         cells = []
@@ -125,13 +362,13 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             model = o.get("model")
             prov_txt = f"{prov}" + (f" · {model}" if model else "")
             cells.append(
-                f'<div class="opt" title="{e(o.get("rationale",""))}">'
+                f'<div class="opt" data-param="{e(p["id"])}" data-opt="{e(o["id"])}">'
                 f'<span class="opt-label">{e(o.get("label", o["id"]))}</span>'
                 f'<span class="prov">{e(prov_txt)}</span></div>'
             )
         rows.append(
-            f'<div class="param"><div class="param-head">{e(p["label"])}</div>'
-            f'<div class="opts">{"".join(cells)}</div></div>'
+            f'<div class="row"><div class="row-label">{e(p["label"])}</div>'
+            f'<div class="row-cells">{"".join(cells)}</div></div>'
         )
 
     constraints_html = []
@@ -148,81 +385,57 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
 
     q = cca["quotient"]
     q_txt = f"{q*100:.1f}%" if q is not None else "—"
-    viable_txt = f'{cca["viable_configs"]:,}' if cca["enumerated"] else "não enumerado (espaço grande)"
+    viable_txt = f'{cca["viable_configs"]:,}' if cca["enumerated"] else "—"
 
-    samples = ""
-    if cca["sample_configs"]:
-        items = []
-        for combo in cca["sample_configs"]:
-            labels = " · ".join(label_for(case, x) for x in combo)
-            items.append(f"<li>{e(labels)}</li>")
-        samples = (
-            '<h2>Amostra de configurações viáveis</h2>'
-            f'<ol class="samples">{"".join(items)}</ol>'
+    # Dados embutidos para a interatividade (sem depender de fetch; roda em file://).
+    data = {
+        "params": [
+            {
+                "id": p["id"],
+                "label": p["label"],
+                "options": [
+                    {
+                        "id": o["id"],
+                        "label": o.get("label", o["id"]),
+                        "rationale": o.get("rationale", ""),
+                        "by": o.get("proposed_by", ""),
+                        "model": o.get("model", ""),
+                    }
+                    for o in p["options"]
+                ],
+            }
+            for p in case["parameters"]
+        ],
+        "constraints": [
+            {
+                "a": c["a"],
+                "b": c["b"],
+                "degree": c.get("degree", ""),
+                "type": c.get("type", ""),
+                "note": c.get("note", ""),
+                "by": c.get("by", ""),
+                "model": c.get("model", ""),
+            }
+            for c in case["constraints"]
+        ],
+    }
+    data_json = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+
+    return (
+        CASE_TEMPLATE.replace("__CASE_ID__", e(case["id"]))
+        .replace("__GENERATED__", e(generated))
+        .replace("__N_PARAMS__", str(cca["n_parameters"]))
+        .replace("__TOTAL__", f'{cca["total_configs"]:,}')
+        .replace("__N_HARD__", str(cca["n_hard_constraints"]))
+        .replace("__VIABLE__", viable_txt)
+        .replace("__QUOTIENT__", q_txt)
+        .replace("__ROWS__", "".join(rows))
+        .replace(
+            "__CONS__",
+            "".join(constraints_html) or "<li>Nenhuma restrição ainda.</li>",
         )
-
-    return f"""<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>idea-waddle — {e(case["id"])}</title>
-<style>
-  :root {{ --bg:#0f1117; --card:#1a1d27; --line:#2a2e3c; --txt:#e6e8ee; --mut:#9aa0b0; --acc:#7aa2f7; --hard:#f7768e; --weak:#e0af68; }}
-  * {{ box-sizing:border-box; }}
-  body {{ margin:0; background:var(--bg); color:var(--txt); font:15px/1.5 system-ui,sans-serif; }}
-  .wrap {{ max-width:1100px; margin:0 auto; padding:24px; }}
-  h1 {{ font-size:24px; margin:0 0 4px; }}
-  .sub {{ color:var(--mut); margin-bottom:20px; }}
-  .stats {{ display:flex; flex-wrap:wrap; gap:12px; margin:16px 0 28px; }}
-  .stat {{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; min-width:130px; }}
-  .stat b {{ display:block; font-size:22px; color:var(--acc); }}
-  .stat span {{ color:var(--mut); font-size:12px; }}
-  h2 {{ font-size:16px; margin:28px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }}
-  .box {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }}
-  .param {{ background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }}
-  .param-head {{ background:#222633; padding:8px 12px; font-weight:600; font-size:13px; }}
-  .opts {{ padding:8px; display:flex; flex-direction:column; gap:6px; }}
-  .opt {{ background:#12151d; border:1px solid var(--line); border-radius:7px; padding:7px 9px; }}
-  .opt-label {{ display:block; font-size:13px; }}
-  .prov {{ display:block; color:var(--mut); font-size:11px; margin-top:2px; }}
-  ul.cons {{ list-style:none; padding:0; }}
-  ul.cons li {{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:9px 12px; margin-bottom:8px; }}
-  ul.cons li.hard {{ border-left-color:var(--hard); }}
-  ul.cons li.weak {{ border-left-color:var(--weak); }}
-  .badge {{ font-size:11px; padding:1px 7px; border-radius:20px; }}
-  .badge.hard {{ background:rgba(247,118,142,.18); color:var(--hard); }}
-  .badge.weak {{ background:rgba(224,175,104,.18); color:var(--weak); }}
-  .ctype {{ color:var(--mut); font-size:12px; }}
-  .samples li, .cons small {{ color:var(--mut); }}
-  footer {{ color:var(--mut); font-size:12px; margin-top:32px; border-top:1px solid var(--line); padding-top:12px; }}
-  a {{ color:var(--acc); }}
-</style></head>
-<body><div class="wrap">
-  <h1>Caixa morfológica viva — {e(case["id"])}</h1>
-  <div class="sub">Plataforma <b>idea-waddle</b> · colaboração criativa humano + agente sobre Git ·
-    gerado em {e(generated)}</div>
-
-  <div class="stats">
-    <div class="stat"><b>{cca["n_parameters"]}</b><span>parâmetros</span></div>
-    <div class="stat"><b>{cca["total_configs"]:,}</b><span>configurações totais</span></div>
-    <div class="stat"><b>{cca["n_hard_constraints"]}</b><span>restrições (poda)</span></div>
-    <div class="stat"><b>{viable_txt}</b><span>configurações viáveis</span></div>
-    <div class="stat"><b>{q_txt}</b><span>espaço de solução</span></div>
-  </div>
-
-  <h2>Parâmetros &amp; opções</h2>
-  <div class="box">{"".join(rows)}</div>
-
-  <h2>Restrições de consistência (CCA)</h2>
-  <ul class="cons">{"".join(constraints_html) or "<li>Nenhuma restrição ainda.</li>"}</ul>
-
-  {samples}
-
-  <footer>
-    Proveniência registrada por opção/restrição (quem · qual modelo). Diversidade é princípio do projeto —
-    veja <a href="https://github.com">o repositório</a>, o <code>AGENTS.md</code> e <code>docs/discovery/</code>.
-    Restrições <span class="badge weak">weak</span> alertam mas não podam.
-  </footer>
-</div></body></html>"""
+        .replace("__DATA_JSON__", data_json)
+    )
 
 
 def render_index(cases: list[dict]) -> str:

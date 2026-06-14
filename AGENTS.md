@@ -78,11 +78,20 @@ Ao ler um PR, um agente deve:
 5. **Atualizar os artefatos vivos** (caixa morfológica, linha do tempo) e propor a mudança via PR — **nunca mesclar sozinho**.
 6. **Registrar proveniência** da própria ação (qual agente/modelo fez a consolidação).
 7. **Preservar diversidade** — sinalizar quando uma só voz (humana ou de um modelo) está dominando; quando possível, buscar uma segunda opinião de outro modelo antes de consolidar.
+8. **Atualizar o registro de evolução** ([`docs/spec/`](docs/spec/)) quando a contribuição representar um marco do projeto (ver §7).
 
 ## 6. Linha do tempo / ciclos
 
 A evolução das ideias é organizada em ciclos, com arquivos numerados no padrão `NNN-slug.md` (ex.: `001-abertura.md`, `002-...`). Isso dá marcos discretos legíveis; combinado com o histórico do Git (genealogia contínua via branches/merges), reconstrói tanto a *árvore genealógica das ideias* quanto a *sequência de marcos*.
 
-## 7. Casos de uso
+## 7. Registro de evolução do projeto (`docs/spec/`)
+
+A pasta [`docs/spec/`](docs/spec/) guarda o **registro vivo da evolução do projeto** — a visão macro do "fio da meada": linha do tempo das decisões (o quê / por quê / consequência), estado atual, decisões em aberto e próximos passos. O arquivo principal é [`docs/spec/00-evolucao.md`](docs/spec/00-evolucao.md).
+
+**Esta pasta deve ser SEMPRE mantida atualizada conforme o projeto evolui.** A cada marco relevante — nova decisão, nova capacidade, mudança de rumo, fechamento de ciclo — humanos e agentes devem registrar uma entrada datada (data absoluta AAAA-MM-DD), atualizar o snapshot de estado atual e mover itens entre "em aberto" e "decidido". Manter este registro em dia é parte do trabalho, não um extra.
+
+> Distinção: `docs/spec/` é a visão **macro** de todo o projeto; os ciclos em `cases/*/cycles/NNN-*.md` (§6) são o registro **fino** por caso. Ambos evoluem juntos.
+
+## 8. Casos de uso
 
 A plataforma é genérica. Conteúdos específicos de cada chamada ficam (à medida que o projeto evolui) em `cases/`. O primeiro caso é o cluster de inferência do CIn-UFPE (ver [`README.md`](README.md)).
