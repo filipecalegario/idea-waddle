@@ -1,0 +1,34 @@
+parameter:
+  id: site
+  label: "Site vivo (publicação)"
+  description: "Como o estado consolidado é publicado."
+  ibis_issue: null
+  options:
+    - id: opt.site.pages
+      label: "GitHub Pages + Actions (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Zero infra extra; deploy preview por PR."
+      scores: { soberania: 2, simplicidade: 5 }
+    - id: opt.site.netlify
+      label: "Netlify / Vercel"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Previews ricos; dependência externa."
+      scores: { soberania: 2, simplicidade: 4 }
+    - id: opt.site.app
+      label: "App dedicado (ex.: Next.js + backend)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Interatividade máxima; mais custo/manutenção."
+      scores: { soberania: 4, simplicidade: 1 }
+    - id: opt.site.ssg
+      label: "Static site generator (Docusaurus/Astro/MkDocs)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Bom meio-termo; combina com Pages."
+      scores: { soberania: 3, simplicidade: 3 }

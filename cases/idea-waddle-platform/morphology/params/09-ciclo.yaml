@@ -1,0 +1,30 @@
+parameter:
+  id: ciclo
+  label: "Granularidade do ciclo / linha do tempo"
+  description: "Como a evolução das ideias é marcada no tempo."
+  ibis_issue: null
+  options:
+    - id: opt.ciclo.numerados
+      label: "Arquivos numerados NNN-slug.md (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Marcos discretos legíveis; padrão preferido."
+    - id: opt.ciclo.tags
+      label: "Tags / milestones do Git"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Nativo; menos visível p/ leigos."
+    - id: opt.ciclo.snapshots
+      label: "Snapshots automáticos do estado da caixa"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Reprodutível; requer tooling."
+    - id: opt.ciclo.combinacao
+      label: "Combinação (arquivos NNN- + tags)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Marcos + genealogia contínua (recomendado)."

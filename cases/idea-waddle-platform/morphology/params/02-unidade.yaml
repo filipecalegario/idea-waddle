@@ -1,0 +1,30 @@
+parameter:
+  id: unidade
+  label: "Unidade de contribuição"
+  description: "Como uma contribuição entra na plataforma."
+  ibis_issue: null
+  options:
+    - id: opt.unidade.pr_markdown
+      label: "PR de Markdown estruturado (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Rastreável, versionável, parseável por agente; casa com NNN-slug."
+    - id: opt.unidade.issues
+      label: "Issues + labels"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Baixa fricção; menos estruturado; difícil versionar o estado."
+    - id: opt.unidade.discussions
+      label: "GitHub Discussions"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Bom p/ conversa aberta; fora do versionamento Git."
+    - id: opt.unidade.form_bot
+      label: "Formulário → bot abre PR"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Menor fricção p/ leigos; exige tooling extra."

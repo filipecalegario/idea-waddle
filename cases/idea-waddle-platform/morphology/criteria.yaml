@@ -1,0 +1,20 @@
+# Critérios de avaliação (QOC) do design da própria plataforma.
+criteria:
+  - id: alcance
+    label: "Alcance (quantos participam)"
+    kind: qualitative
+    scale: "1-5 (maior = mais alcance)"
+    direction: maximize
+    aggregation: min
+  - id: soberania
+    label: "Soberania de dados"
+    kind: qualitative
+    scale: "1-5 (maior = mais soberano)"
+    direction: maximize
+    aggregation: min
+  - id: simplicidade
+    label: "Simplicidade operacional"
+    kind: qualitative
+    scale: "1-5 (maior = mais simples)"
+    direction: maximize
+    aggregation: min

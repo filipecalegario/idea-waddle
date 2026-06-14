@@ -1,0 +1,34 @@
+parameter:
+  id: substrato
+  label: "Substrato de versionamento"
+  description: "Onde mora a espinha dorsal de Git da plataforma."
+  ibis_issue: null
+  options:
+    - id: opt.substrato.github
+      label: "GitHub (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Maior alcance; Actions, Pages, fork/PR nativos; onde humanos e agentes já estão."
+      scores: { alcance: 5, soberania: 2, simplicidade: 4 }
+    - id: opt.substrato.gitlab
+      label: "GitLab (self-hosted)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Soberania de dados; CI nativo; menor alcance público."
+      scores: { alcance: 2, soberania: 5, simplicidade: 3 }
+    - id: opt.substrato.gitea
+      label: "Gitea / Forgejo"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Controle total e leve; alcance baixo."
+      scores: { alcance: 1, soberania: 5, simplicidade: 2 }
+    - id: opt.substrato.radicle
+      label: "Radicle (Git P2P)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Descentralizado de verdade; ecossistema imaturo, pouca gente."
+      scores: { alcance: 1, soberania: 5, simplicidade: 1 }

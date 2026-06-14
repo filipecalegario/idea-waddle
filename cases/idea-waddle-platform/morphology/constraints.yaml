@@ -1,0 +1,35 @@
+# Cross-Consistency Assessment (CCA) do design da plataforma.
+#   type:   logical | empirical | normative
+#   degree: incompatible | weak | ok  (apenas 'incompatible' poda)
+constraints:
+  - a: opt.substrato.radicle
+    b: opt.site.pages
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "GitHub Pages é específico do GitHub; exigiria outro publicador."
+
+  - a: opt.consolidacao.agente_unico
+    b: opt.diversidade.quorum
+    type: logical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Quorum exige ≥2 modelos; um agente único não satisfaz."
+
+  - a: opt.unidade.discussions
+    b: opt.sintese.caixa
+    type: empirical
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Conteúdo em Discussions (fora do Git) dificulta versionar o estado da caixa — alerta."
+
+  - a: opt.governanca.automerge
+    b: opt.diversidade.quorum
+    type: normative
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Auto-merge contraria a ratificação humana que a governança de diversidade pede — alerta."

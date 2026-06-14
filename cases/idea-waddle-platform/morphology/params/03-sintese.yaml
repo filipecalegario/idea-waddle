@@ -1,0 +1,36 @@
+parameter:
+  id: sintese
+  label: "Artefato de síntese central"
+  description: "Como as contribuições são consolidadas."
+  ibis_issue: null
+  options:
+    - id: opt.sintese.caixa
+      label: "Caixa morfológica + CCA (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Ótimo p/ opções + restrições; gera caminhos de decisão."
+    - id: opt.sintese.ibis
+      label: "Grafo IBIS (Questões/Posições/Argumentos)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Melhor p/ a discussão; complementar à caixa."
+    - id: opt.sintese.qoc
+      label: "QOC (Questions-Options-Criteria)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Ponte entre IBIS e a caixa; adiciona critérios de avaliação."
+    - id: opt.sintese.dung
+      label: "Argumentation Framework (Dung)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Poda automática de argumentos; mais técnico/abstrato."
+    - id: opt.sintese.camadas
+      label: "Combinação em camadas (IBIS→QOC→Caixa→Dung)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Mais rico; mais complexo de implementar."

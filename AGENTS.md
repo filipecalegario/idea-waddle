@@ -100,4 +100,4 @@ A pasta [`docs/spec/`](docs/spec/) guarda o **registro vivo da evolução do pro
 
 ## 8. Casos de uso
 
-A plataforma é genérica. Conteúdos específicos de cada chamada ficam (à medida que o projeto evolui) em `cases/`. O primeiro caso é o cluster de inferência do CIn-UFPE (ver [`README.md`](README.md)).
+A plataforma é genérica. Conteúdos específicos de cada chamada ficam em `cases/` (caso *bundled*) ou em **repositórios próprios** que consomem este motor via CI (variáveis `IW_CASE`/`IW_SITE`). Casos atuais: o **cluster de inferência do CIn-UFPE** (repo próprio: https://github.com/filipecalegario/cin-cluster-inferencia) e o caso **auto-referente** do design da plataforma em [`cases/idea-waddle-platform/`](cases/idea-waddle-platform/). Ver [`README.md`](README.md).

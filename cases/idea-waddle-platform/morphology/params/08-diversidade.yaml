@@ -1,0 +1,30 @@
+parameter:
+  id: diversidade
+  label: "Política de diversidade (anti-dominância)"
+  description: "Como evitar que uma só voz/modelo domine a discussão."
+  ibis_issue: null
+  options:
+    - id: opt.diversidade.quorum
+      label: "Quorum de modelos distintos (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Ex.: ≥2 famílias concordam; reduz viés de um único LLM."
+    - id: opt.diversidade.rodizio
+      label: "Rodízio de modelos por ciclo"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Diversidade temporal; mais simples."
+    - id: opt.diversidade.proveniencia
+      label: "Etiquetagem de proveniência"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Quem/qual modelo disse o quê; transparência mínima obrigatória."
+    - id: opt.diversidade.cotas
+      label: "Cotas humano:agente por ciclo"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Garante voz humana; exige medição."

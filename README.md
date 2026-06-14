@@ -28,12 +28,13 @@ A plataforma é, portanto, uma infraestrutura para **polinização de ideias** e
 
 **idea-waddle é uma plataforma genérica de colaboração criativa.** Ela serve a qualquer problema de design coletivo que se beneficie de explorar muitas alternativas e convergir com rastreabilidade.
 
-O **primeiro caso de uso** — e o que motivou a criação da plataforma — é:
+Cada **caso de uso** combina o **motor genérico** (este repositório) com os **conteúdos específicos** de uma chamada. Casos podem morar **em repositórios próprios** (consumindo este motor via CI) ou aqui em `cases/`.
 
-### Caso 0 · Arquitetura do cluster de inferência do CIn-UFPE
-Uma chamada pública para contribuições (de humanos e agentes) sobre como especificar um **cluster de inferência** para o Centro de Informática da UFPE. O CIn já opera o **Apuana**, um cluster *batch* focado em treinamento; a proposta é projetar uma infraestrutura voltada a **inferência** — incluindo o experimento de prover um LLM para a comunidade universitária. O resultado esperado: **caminhos de decisão** (com estimativas de custo de capital, energia/mês, opções de aquisição de GPUs — mercado americano vs. chinês, fornecedores, parcerias) a apresentar aos laboratórios e à diretoria do CIn, que podem financiar o cluster.
+### Casos
+- **Cluster de inferência do CIn-UFPE** — o primeiro caso concreto e o que motivou a plataforma: uma chamada pública para especificar uma infraestrutura de **inferência** para o Centro de Informática da UFPE (complementando o cluster *batch* "Apuana"), chegando a **caminhos de decisão** com estimativas de custo/energia e opções de aquisição de GPUs para a diretoria. Vive em repositório próprio: **https://github.com/filipecalegario/cin-cluster-inferencia**.
+- **Design da própria plataforma** ([`cases/idea-waddle-platform/`](cases/idea-waddle-platform/)) — caso **auto-referente** (*inception*): a caixa morfológica usada para decidir como construir a idea-waddle. Serve de exemplo vivo do método, incluído neste repositório.
 
-> Conforme o projeto evolui, os casos de uso ficarão em `cases/` (ex.: `cases/cin-ufpe-inference-cluster/`), separando o **motor genérico** dos **conteúdos específicos** de cada chamada.
+> Um repositório de caso externo usa o motor com as variáveis `IW_CASE`/`IW_SITE` (ver [`engine/cca.py`](engine/cca.py)); o caso bundled usa o modo padrão (`cases/`).
 
 ---
 

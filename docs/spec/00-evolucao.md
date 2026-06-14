@@ -90,13 +90,19 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Item 2 (transferência com histórico):** `git subtree split --prefix=cases/cin-ufpe-inference-cluster` → branch `cin-split` (prefixo removido, 5 commits do caso preservados) → transferido para o novo repo `github.com/filipecalegario/cin-cluster-inferencia` (layout: `morphology/` e `cycles/` na raiz).
 - **Item 3 (repo do caso autônomo):** lá foram criados README/AGENTS (fino, aponta p/ o protocolo canônico)/CALL + `.github/workflows/build-site.yml` que faz **checkout da idea-waddle** e roda o motor via `IW_CASE`, publicando o próprio Pages.
 - **Suporte no motor:** `cca.py`/`lint.py` aceitam `IW_CASE` (um único diretório de caso, `morphology/` na raiz) e `IW_CASE_ID`; `load_case` resolve o id do nome do diretório. Validado contra o repo novo (id `cin-cluster-inferencia`, mesmos números).
-- **Pendente (item 4):** a idea-waddle ainda contém `cases/cin-ufpe-inference-cluster/` (para não quebrar seu build). Decidir: removê-lo e converter `docs/discovery/03` no caso auto-referente da própria plataforma, ou mantê-lo como exemplo/demo.
+- **Item 4:** resolvido a seguir (caso auto-referente).
+
+### 2026-06-14 — Separação, item 4: caso auto-referente; CIn removido da plataforma
+- **Decisão (usuário):** converter em caso auto-referente.
+- **O que foi feito:** removido `cases/cin-ufpe-inference-cluster/` da idea-waddle; criado [`cases/idea-waddle-platform/`](../../cases/idea-waddle-platform/) — a caixa morfológica do **design da própria plataforma** (9 params, 4 restrições, critérios alcance/soberania/simplicidade), semeada a partir de `docs/discovery/03`. *Inception*: a plataforma demonstra o método com o próprio caso dela.
+- **Resultado:** idea-waddle constrói `idea-waddle-platform` (9 params · 327.680 configs · 288.000 viáveis · 2 restrições hard). README/AGENTS atualizados: CIn aponta para o repo próprio; caso bundled é o auto-referente. Separação plataforma × caso **concluída**.
 
 ## Estado atual (snapshot)
-- **Fase:** protótipo em evolução. Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
-- **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
-- **Camada ativa:** caixa morfológica (11 params) + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
-- **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) **e** a branch protection da `main` (ver CODEOWNERS).
+- **Fase:** protótipo em evolução. Plataforma e caso CIn agora em **repositórios separados**.
+- **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
+- **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
+- **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
+- **Pendência operacional:** em **ambos** os repos, habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) e a branch protection da `main` (ver CODEOWNERS). No repo do caso, a CI faz checkout público da idea-waddle (se ela for privada, precisa de token).
 
 ## Decisões em aberto
 (ver detalhes em [`/docs/discovery/04-perguntas-provocacoes.md`](../discovery/04-perguntas-provocacoes.md))

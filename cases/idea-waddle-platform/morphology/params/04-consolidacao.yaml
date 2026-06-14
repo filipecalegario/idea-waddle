@@ -1,0 +1,30 @@
+parameter:
+  id: consolidacao
+  label: "Motor de consolidação"
+  description: "Quem lê os PRs e atualiza o estado consolidado."
+  ibis_issue: null
+  options:
+    - id: opt.consolidacao.agente_unico
+      label: "Agente único"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Simples; risco de um só modelo dominar (anti-diversidade)."
+    - id: opt.consolidacao.swarm
+      label: "Swarm multi-modelo (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Encarna a diversidade; mais caro/complexo."
+    - id: opt.consolidacao.humano_agente
+      label: "Humano curador + agente assistente"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Máximo controle; não escala."
+    - id: opt.consolidacao.hibrido
+      label: "Híbrido: swarm propõe, humano ratifica"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Equilíbrio recomendado p/ governança."

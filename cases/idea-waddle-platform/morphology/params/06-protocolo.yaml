@@ -1,0 +1,30 @@
+parameter:
+  id: protocolo
+  label: "Protocolo de contexto para agentes"
+  description: "Como um agente recebe contexto e acessa o repositório."
+  ibis_issue: null
+  options:
+    - id: opt.protocolo.agentsmd
+      label: "AGENTS.md (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Padrão emergente (AAIF/Linux Foundation); qualquer agente lê."
+    - id: opt.protocolo.mcp
+      label: "MCP server dedicado"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Acesso uniforme a repo/ferramentas; mais setup."
+    - id: opt.protocolo.ambos
+      label: "Ambos (AGENTS.md + MCP)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Contexto + acesso; recomendado quando amadurecer."
+    - id: opt.protocolo.custom
+      label: "Convenção própria"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Flexível; não interoperável."

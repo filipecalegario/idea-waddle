@@ -1,0 +1,30 @@
+parameter:
+  id: governanca
+  label: "Governança / merge"
+  description: "Como uma contribuição é (ou não) incorporada."
+  ibis_issue: null
+  options:
+    - id: opt.governanca.hitl
+      label: "Human-in-the-loop (recomendado)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "PR só mergeia com aprovação humana; lição dos incidentes de 'AI maintainer'."
+    - id: opt.governanca.fcp
+      label: "Final Comment Period (estilo Rust)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Bom p/ deliberação madura; mais lento."
+    - id: opt.governanca.automerge
+      label: "Auto-merge com veto humano"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Rápido; arriscado no início."
+    - id: opt.governanca.quorum
+      label: "Quorum multi-agente + ratificação humana"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Encarna diversidade + segurança."
