@@ -81,6 +81,11 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Ratificação humana:** [`.github/CODEOWNERS`](../../.github/CODEOWNERS) (dono revisa) + [`pull_request_template.md`](../../.github/pull_request_template.md) com o protocolo. Nenhum PR é auto-mesclado.
 - **Pendência operacional:** habilitar no GitHub a branch protection (require PR + review de Code Owners + status check `lint`).
 
+### 2026-06-14 — Separação plataforma × caso, item 1: motor parametrizável
+- **Contexto:** decidir separar o repo abstrato (plataforma idea-waddle: motor + protocolo) do concreto (caso do cluster CIn), mantendo o motor reusável. Plano em 5 passos (ver discussão); este é o **item 1**, reversível e sem mover arquivos.
+- **O que foi feito:** `engine/cca.py` e `engine/lint.py` agora aceitam `IW_CASES` (origem dos casos) e `IW_SITE` (saída do site) por variável de ambiente; sem elas, o comportamento padrão (`cases/`, `site/`) é idêntico. `lint.rel()` ficou robusto a caminhos fora do repo.
+- **Validação:** padrão inalterado; com `IW_CASES`/`IW_SITE` apontando p/ um diretório externo, motor e lint operam sobre o caso externo e geram o site lá, sem tocar no repo local. Abre caminho para o repo do caso CIn consumir o motor via checkout na CI (item 3).
+
 ## Estado atual (snapshot)
 - **Fase:** protótipo em evolução. Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.

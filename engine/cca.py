@@ -13,12 +13,17 @@ Uso:
     pip install pyyaml
     python engine/cca.py
     # abra site/index.html
+
+Variáveis de ambiente (opcionais, p/ consumir casos de um repo externo):
+    IW_CASES  diretório com os casos (default: <repo>/cases)
+    IW_SITE   diretório de saída do site (default: <repo>/site)
 """
 from __future__ import annotations
 
 import html
 import itertools
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,8 +34,11 @@ except ImportError:
     sys.exit("Falta a dependência PyYAML. Rode: pip install pyyaml")
 
 ROOT = Path(__file__).resolve().parent.parent
-CASES_DIR = ROOT / "cases"
-SITE_DIR = ROOT / "site"
+# Origem dos casos e destino do site são configuráveis por ambiente, para que o
+# motor possa ser consumido por um repositório de caso externo (ver docs/spec).
+# Sem as variáveis, o comportamento é o padrão (cases/ e site/ deste repo).
+CASES_DIR = Path(os.environ.get("IW_CASES", ROOT / "cases"))
+SITE_DIR = Path(os.environ.get("IW_SITE", ROOT / "site"))
 # Limite de segurança para enumeração do produto cartesiano.
 ENUM_LIMIT = 2_000_000
 

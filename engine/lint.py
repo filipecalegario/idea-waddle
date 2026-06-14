@@ -12,10 +12,13 @@ Uso:
     python engine/lint.py            # valida todos os casos
     echo $?                          # 0 = ok, 1 = há erros
 
+Variável de ambiente (opcional): IW_CASES = diretório de casos (default: cases/).
+
 Saída: avisos (⚠, não bloqueiam) e erros (✗, bloqueiam / exit 1).
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -26,7 +29,8 @@ except ImportError:
     sys.exit("Falta a dependência PyYAML. Rode: pip install pyyaml")
 
 ROOT = Path(__file__).resolve().parent.parent
-CASES = ROOT / "cases"
+# Origem dos casos é configurável (ver IW_CASES em engine/cca.py). Default: cases/.
+CASES = Path(os.environ.get("IW_CASES", ROOT / "cases"))
 
 DEGREES = {"incompatible", "weak", "ok"}
 CTYPES = {"logical", "empirical", "normative"}
@@ -49,7 +53,13 @@ class Report:
 
 
 def rel(p: Path) -> str:
-    return str(p.relative_to(ROOT))
+    # Robusto a casos fora do ROOT (ex.: IW_CASES apontando p/ outro repo).
+    for base in (ROOT, CASES, CASES.parent):
+        try:
+            return str(p.relative_to(base))
+        except ValueError:
+            continue
+    return str(p)
 
 
 def load_yaml(path: Path, rep: Report):
