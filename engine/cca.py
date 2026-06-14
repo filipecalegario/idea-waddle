@@ -536,12 +536,15 @@ CASE_TEMPLATE = r"""<!doctype html>
   .qoc-wrap { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
   .qoc-block { background:var(--panel); border:1px solid var(--rule-2); padding:12px 14px; }
   .qoc-p { font-family:var(--disp); font-weight:600; font-size:14px; margin-bottom:8px; }
-  table.qoc { width:100%; border-collapse:collapse; font-size:12.5px; }
-  table.qoc th { font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase;
-    color:var(--ink-2); text-align:center; font-weight:400; padding:3px 4px; border-bottom:1px solid var(--rule); }
+  table.qoc { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  table.qoc th, table.qoc td { overflow:hidden; vertical-align:bottom; }
+  table.qoc th { font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--ink-2); text-align:center; font-weight:400; padding:3px 3px; line-height:1.15;
+    white-space:normal; word-break:break-word; border-bottom:1px solid var(--rule); }
   table.qoc th:first-child { text-align:left; }
-  table.qoc td { padding:5px 4px; border-bottom:1px solid var(--rule); }
-  table.qoc td.opt-name { font-family:var(--mono); font-size:11px; }
+  table.qoc col.c-opt { width:46%; }
+  table.qoc td { padding:5px 3px; border-bottom:1px solid var(--rule); vertical-align:middle; }
+  table.qoc td.opt-name { font-family:var(--mono); font-size:10.5px; white-space:normal; word-break:break-word; line-height:1.2; }
   table.qoc td.sc { text-align:center; font-family:var(--disp); font-weight:600; font-variant-numeric:tabular-nums; }
   table.qoc td.sc.na { color:var(--rule-2); font-weight:400; }
 
@@ -1001,7 +1004,12 @@ def render_case_html(case: dict, cca: dict, generated: str, case_dir: Path | Non
     qoc_html = ""
     if qual_crit:
         tables = []
-        head = "".join(f"<th>{e(c.get('label', c['id']))}</th>" for c in qual_crit)
+        colgroup = '<colgroup><col class="c-opt">' + "<col>" * len(qual_crit) + "</colgroup>"
+        head = "".join(
+            f'<th title="{e(c.get("label", c["id"]))}">'
+            f'{e(c.get("short") or c.get("label", c["id"]))}</th>'
+            for c in qual_crit
+        )
         for p in case["parameters"]:
             rows_q = []
             for o in active_options(p):
@@ -1013,7 +1021,7 @@ def render_case_html(case: dict, cca: dict, generated: str, case_dir: Path | Non
                 rows_q.append(f"<tr><td class='opt-name'>{e(o.get('label', o['id']))}</td>{cells}</tr>")
             tables.append(
                 f'<div class="qoc-block"><div class="qoc-p">{e(p["label"])}</div>'
-                f'<table class="qoc"><thead><tr><th></th>{head}</tr></thead>'
+                f'<table class="qoc">{colgroup}<thead><tr><th></th>{head}</tr></thead>'
                 f'<tbody>{"".join(rows_q)}</tbody></table></div>'
             )
         qoc_html = "".join(tables)

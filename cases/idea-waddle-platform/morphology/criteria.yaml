@@ -3,6 +3,7 @@
 criteria:
   - id: alcance
     label: "Alcance (quantos participam)"
+    short: "Alcance"
     kind: qualitative
     scale: "1-5 (maior = mais alcance)"
     direction: maximize
@@ -10,6 +11,7 @@ criteria:
     weight: 2
   - id: soberania
     label: "Soberania de dados"
+    short: "Soberania"
     kind: qualitative
     scale: "1-5 (maior = mais soberano)"
     direction: maximize
@@ -17,6 +19,7 @@ criteria:
     weight: 1
   - id: simplicidade
     label: "Simplicidade operacional"
+    short: "Simplicidade"
     kind: qualitative
     scale: "1-5 (maior = mais simples)"
     direction: maximize
