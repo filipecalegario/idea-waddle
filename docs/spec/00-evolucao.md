@@ -71,6 +71,10 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **O que foi feito:** ciclo [`002-segunda-opiniao.md`](../../cases/cin-ufpe-inference-cluster/cycles/002-segunda-opiniao.md) com crítica à semeadura (foco em capex, ausência de opex/sustentabilidade, lock-in, alternativas frugais). Contribuições reais à caixa por `agent:revisor-2`: nova opção *GPUs de consumo/refurbished*; novo critério *Sustentabilidade*; 2 restrições (consumo × mercado chinês / × escala média). Divergências Q-A..Q-F (provisão nuvem, federação c/ Apuana, contestar restrições, opex/prazo/carbono) deixadas como Questões para debate.
 - **Resultado:** 11 params · **524.880 configurações · 233.280 viáveis (44,4%)** · 10 restrições. Proveniência distinta (`agent:discovery` vs `agent:revisor-2`) visível no site.
 
+### 2026-06-14 — Redesign da interface (skill frontend-design)
+- **Pedido do usuário:** sair do visual genérico de IA (dark-card/azul). Usada a skill **frontend-design**.
+- **Direção estética:** *dossiê técnico / editorial científico* — fundo papel com grid milimetrado + grão sutil; tipografia com caráter (**Fraunces** display, **Archivo** corpo, **IBM Plex Mono** dados); réguas finas e sombras sólidas deslocadas; seções numeradas (§), marcas de registro nos cantos do instrumento; caixa morfológica como folha de especificação; estimativas como "leitura de instrumento" com medidores segmentados; células selecionáveis com estados estampados/hachurados; reveals escalonados no load (respeita prefers-reduced-motion). Tudo continua gerado por `engine/cca.py`.
+
 ## Estado atual (snapshot)
 - **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.

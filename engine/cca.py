@@ -138,132 +138,225 @@ CASE_TEMPLATE = r"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>idea-waddle — __CASE_ID__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0f1117; --card:#1a1d27; --line:#2a2e3c; --txt:#e6e8ee; --mut:#9aa0b0;
-          --acc:#7aa2f7; --hard:#f7768e; --weak:#e0af68; --ok:#9ece6a; }
+  :root {
+    --paper:#ece4d3; --paper-2:#e2d8c2; --panel:#f2ecdf; --ink:#1b1812; --ink-2:#544d3f;
+    --rule:rgba(27,24,18,.15); --rule-2:rgba(27,24,18,.45);
+    --signal:#bf3a1d; --blue:#234a63; --ok:#5e6a2b; --ochre:#9a6a12; --hatch:rgba(191,58,29,.13);
+    --disp:'Fraunces',Georgia,'Times New Roman',serif;
+    --body:'Archivo',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+  }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.5 system-ui,sans-serif; }
-  .wrap { max-width:1180px; margin:0 auto; padding:24px; }
-  h1 { font-size:24px; margin:0 0 4px; }
-  .sub { color:var(--mut); margin-bottom:20px; }
-  .stats { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0 22px; }
-  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; min-width:128px; }
-  .stat b { display:block; font-size:22px; color:var(--acc); }
-  .stat span { color:var(--mut); font-size:12px; }
-  h2 { font-size:16px; margin:26px 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
-  .hint { color:var(--mut); font-size:13px; margin:-4px 0 12px; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    margin:0; color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.55;
+    background-color:var(--paper);
+    background-image:linear-gradient(var(--rule) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+    background-size:30px 30px; background-position:-1px -1px;
+  }
+  body::before {
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection { background:var(--signal); color:var(--paper); }
+  .topbar { position:fixed; top:0; left:0; right:0; height:5px; background:var(--signal); z-index:30; }
+  .wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:40px 28px 84px; counter-reset:sec; }
+  a { color:var(--blue); text-underline-offset:3px; }
+  code { font-family:var(--mono); font-size:.86em; background:var(--paper-2); padding:1px 5px; }
 
-  /* Caixa morfológica no padrão GMA: cada LINHA é um parâmetro; células = opções. */
-  .gma { border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-  .row { display:flex; align-items:stretch; border-bottom:1px solid var(--line); }
-  .row:last-child { border-bottom:0; }
-  .row-label { flex:0 0 175px; background:#222633; padding:12px; font-weight:600; font-size:13px;
-               display:flex; align-items:center; border-right:1px solid var(--line); }
-  .row-cells { flex:1; display:flex; flex-wrap:wrap; gap:8px; padding:10px; }
-  .opt { flex:1 1 150px; min-width:140px; background:#12151d; border:1px solid var(--line);
-         border-radius:8px; padding:8px 10px; cursor:pointer; transition:.12s; user-select:none; }
-  .opt:hover { border-color:var(--acc); }
-  .opt-label { display:block; font-size:13px; }
-  .prov { display:block; color:var(--mut); font-size:11px; margin-top:3px; }
-  .opt.selected { border-color:var(--acc); background:rgba(122,162,247,.16); box-shadow:0 0 0 1px var(--acc) inset; }
-  .opt.blocked { opacity:.45; border-color:var(--hard); border-style:dashed; cursor:not-allowed; }
-  .opt.blocked .opt-label { text-decoration:line-through; }
-  .opt.warn { border-color:var(--weak); }
-  .opt.flash { animation:flash .5s; }
-  @keyframes flash { 0%,100%{background:#12151d;} 30%{background:rgba(247,118,142,.30);} }
+  /* cabeçalho (masthead) */
+  .masthead { animation:rise .6s both; }
+  .dateline-row { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); }
+  .title { font-family:var(--disp); font-weight:600; font-size:clamp(44px,9vw,86px); line-height:.9;
+    letter-spacing:-.025em; margin:.16em 0 .12em; }
+  .title .dot { color:var(--signal); }
+  .standfirst { font-family:var(--disp); font-style:italic; font-weight:400; font-size:clamp(16px,2.5vw,22px);
+    color:var(--ink-2); max-width:48ch; margin:0; }
+  .rule-d { border:0; border-top:1px solid var(--rule-2); box-shadow:0 3px 0 -2px var(--rule-2); margin:20px 0 0; }
 
-  .panels { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
-  @media (max-width:760px){ .panels{ grid-template-columns:1fr; } .row{ flex-direction:column; } .row-label{ flex-basis:auto; border-right:0; border-bottom:1px solid var(--line);} }
-  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; }
-  .panel h3 { margin:0 0 10px; font-size:14px; }
-  .panel .empty { color:var(--mut); font-size:13px; }
-  .selitem { border-left:3px solid var(--acc); padding:4px 0 4px 10px; margin-bottom:10px; }
-  .selitem .p { color:var(--mut); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
-  .selitem .l { font-size:14px; }
-  .selitem .r { color:var(--mut); font-size:12px; margin-top:2px; }
-  .selitem .by { color:var(--mut); font-size:11px; margin-top:3px; font-style:italic; }
-  .cline { border-left:3px solid var(--line); padding:6px 0 6px 10px; margin-bottom:9px; font-size:13px; }
-  .cline.hard { border-left-color:var(--hard); }
-  .cline.weak { border-left-color:var(--weak); }
-  .cline small { color:var(--mut); display:block; margin-top:2px; }
-  .badge { font-size:11px; padding:1px 7px; border-radius:20px; }
-  .badge.hard { background:rgba(247,118,142,.18); color:var(--hard); }
-  .badge.weak { background:rgba(224,175,104,.18); color:var(--weak); }
-  .space { margin-top:10px; font-size:13px; }
-  .space b { color:var(--ok); }
-  .estpanel { margin:0 0 22px; position:sticky; top:0; z-index:5;
-              box-shadow:0 6px 16px rgba(0,0,0,.35); }
-  .estnote { color:var(--mut); font-size:12px; font-weight:400; }
-  .est-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
-  .est { background:#12151d; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
-  .est .k { color:var(--mut); font-size:12px; }
-  .est .v { font-size:19px; color:var(--acc); margin-top:2px; }
-  .est.qual .v { color:var(--ok); }
-  .est .miss { color:var(--mut); font-size:13px; }
-  .est .bar { height:6px; border-radius:4px; background:var(--line); margin-top:6px; overflow:hidden; }
-  .est .bar > i { display:block; height:100%; background:var(--ok); }
-  .est small { color:var(--mut); display:block; margin-top:3px; }
-  .btn { background:#222633; color:var(--txt); border:1px solid var(--line); border-radius:7px;
-         padding:6px 12px; cursor:pointer; font-size:13px; }
-  .btn:hover { border-color:var(--acc); }
-  ul.cons { list-style:none; padding:0; }
-  ul.cons li { background:var(--card); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:9px 12px; margin-bottom:8px; }
-  ul.cons li.hard { border-left-color:var(--hard); }
-  ul.cons li.weak { border-left-color:var(--weak); }
-  .ctype { color:var(--mut); font-size:12px; }
-  .cons small { color:var(--mut); }
-  footer { color:var(--mut); font-size:12px; margin-top:32px; border-top:1px solid var(--line); padding-top:12px; }
-  a { color:var(--acc); }
+  /* faixa de indicadores */
+  .readout { display:flex; flex-wrap:wrap; margin:24px 0 28px; border:1px solid var(--rule-2);
+    background:var(--panel); animation:rise .6s .08s both; }
+  .metric { flex:1 1 0; min-width:118px; padding:14px 16px; border-right:1px solid var(--rule); }
+  .metric:last-child { border-right:0; }
+  .metric .mv { font-family:var(--disp); font-weight:600; font-size:30px; line-height:1; font-variant-numeric:tabular-nums; }
+  .metric.accent .mv { color:var(--signal); }
+  .metric .ml { display:block; margin-top:7px; font-family:var(--mono); font-size:10px; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--ink-2); }
+
+  /* instrumento (estimativas), fixo no topo */
+  .instrument { position:sticky; top:14px; z-index:8; background:var(--panel); border:1.5px solid var(--ink);
+    padding:16px 18px; margin:0 0 30px; box-shadow:7px 7px 0 var(--rule-2); animation:rise .6s .16s both; }
+  .instrument::before, .instrument::after { content:""; position:absolute; width:11px; height:11px; }
+  .instrument::before { top:-1px; left:-1px; border-top:2px solid var(--signal); border-left:2px solid var(--signal); }
+  .instrument::after { bottom:-1px; right:-1px; border-bottom:2px solid var(--signal); border-right:2px solid var(--signal); }
+  .instrument .ihead { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:13px; }
+  .instrument h2 { font-family:var(--disp); font-weight:600; font-size:19px; margin:0; }
+  .note { font-family:var(--mono); font-size:11.5px; color:var(--ink-2); }
+
+  .est-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:1px;
+    background:var(--rule); border:1px solid var(--rule); }
+  .est { background:var(--panel); padding:11px 14px; }
+  .est .k { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); }
+  .est .v { font-family:var(--disp); font-weight:600; font-size:23px; line-height:1.1; margin-top:4px;
+    font-variant-numeric:tabular-nums; animation:tick .4s ease; }
+  .est .v .u { font-family:var(--mono); font-weight:400; font-size:12px; color:var(--ink-2); }
+  .est .miss { font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:7px; }
+  .gauge { display:flex; gap:3px; margin-top:9px; }
+  .gauge span { flex:1; height:9px; background:var(--rule); }
+  .gauge span.on { background:var(--ok); }
+  .est .qv { font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:5px; }
+
+  /* títulos de seção numerados */
+  .sec { display:flex; align-items:baseline; gap:12px; margin:38px 0 10px; counter-increment:sec; }
+  .sec .no { font-family:var(--mono); font-size:12px; color:var(--signal); letter-spacing:.06em; }
+  .sec .no::before { content:"§" counter(sec,decimal-leading-zero); }
+  .sec h2 { font-family:var(--disp); font-weight:600; font-size:22px; margin:0; letter-spacing:-.01em; }
+  .sec .line { flex:1; border-top:1px solid var(--rule); align-self:center; }
+  .lead { color:var(--ink-2); font-size:14px; margin:0 0 16px; max-width:78ch; }
+
+  /* caixa morfológica (padrão GMA: linha = parâmetro) */
+  .gma { border:1.5px solid var(--ink); background:var(--panel); counter-reset:row;
+    box-shadow:7px 7px 0 var(--rule-2); }
+  .row { display:grid; grid-template-columns:226px 1fr; border-top:1px solid var(--rule);
+    counter-increment:row; animation:rise .5s both; animation-delay:calc(var(--i,0)*55ms); }
+  .row:first-child { border-top:0; }
+  .row-label { padding:14px 16px; border-right:1px solid var(--rule); }
+  .row-label .rl-no { font-family:var(--mono); font-size:11px; color:var(--signal); letter-spacing:.08em; }
+  .row-label .rl-no::before { content:"§" counter(row,decimal-leading-zero); }
+  .row-label .rl-name { display:block; font-family:var(--disp); font-weight:600; font-size:16px; line-height:1.15; margin-top:3px; }
+  .row-label .rl-desc { display:block; font-size:11.5px; color:var(--ink-2); margin-top:6px; line-height:1.35; }
+  .row-cells { display:flex; flex-wrap:wrap; gap:8px; padding:12px; align-content:flex-start; }
+  .opt { position:relative; flex:1 1 162px; min-width:150px; padding:10px 12px; background:var(--paper);
+    border:1px solid var(--rule-2); cursor:pointer; user-select:none;
+    transition:transform .12s, box-shadow .12s, background .12s, color .12s; }
+  .opt:hover { transform:translate(-2px,-2px); box-shadow:3px 3px 0 var(--ink); }
+  .opt .ol { display:block; font-family:var(--mono); font-size:12.5px; font-weight:500; line-height:1.3; padding-right:14px; }
+  .opt .op { display:block; margin-top:7px; font-family:var(--mono); font-size:9.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2); }
+  .opt.selected { background:var(--ink); color:var(--paper); border-color:var(--ink); box-shadow:3px 3px 0 var(--signal); }
+  .opt.selected .op { color:rgba(236,228,211,.66); }
+  .opt.selected::after { content:"\25CF"; position:absolute; top:9px; right:10px; color:var(--signal); font-size:9px; }
+  .opt.blocked { cursor:not-allowed; color:var(--signal); border-style:dashed; border-color:var(--signal);
+    background-image:repeating-linear-gradient(45deg,transparent 0 6px,var(--hatch) 6px 7px); }
+  .opt.blocked .ol { text-decoration:line-through; }
+  .opt.blocked:hover { transform:none; box-shadow:none; }
+  .opt.warn { border-color:var(--ochre); }
+  .opt.warn::after { content:"!"; position:absolute; top:7px; right:11px; color:var(--ochre); font-family:var(--disp); font-weight:700; }
+  .opt.flash { animation:nope .4s; }
+
+  /* livros-razão (seleção / restrições) */
+  .panels { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+  .ledger { background:var(--panel); border:1px solid var(--rule-2); padding:16px 18px; }
+  .ledger h3 { font-family:var(--disp); font-weight:600; font-size:15px; margin:0 0 13px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .empty { font-family:var(--mono); font-size:12px; color:var(--ink-2); }
+  .selitem { padding:8px 0 8px 14px; border-left:2px solid var(--ink); margin-bottom:13px; }
+  .selitem .p { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--signal); }
+  .selitem .l { font-family:var(--disp); font-weight:500; font-size:15px; margin-top:2px; }
+  .selitem .r { font-size:12.5px; color:var(--ink-2); margin-top:3px; }
+  .selitem .by { font-family:var(--mono); font-size:10px; color:var(--ink-2); margin-top:4px; }
+  .space { margin-top:10px; padding-top:10px; border-top:1px dashed var(--rule-2);
+    font-family:var(--mono); font-size:12px; color:var(--ink-2); }
+  .space b { font-family:var(--disp); font-size:18px; color:var(--signal); }
+  .cline { padding:8px 0 8px 12px; border-left:2px solid var(--rule-2); margin-bottom:11px; font-size:13px; }
+  .cline.hard { border-left-color:var(--signal); }
+  .cline.weak { border-left-color:var(--ochre); }
+  .cline small { display:block; color:var(--ink-2); margin-top:3px; }
+  .badge { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    padding:1px 6px; border:1px solid currentColor; }
+  .badge.hard { color:var(--signal); }
+  .badge.weak { color:var(--ochre); }
+  .ctype { font-family:var(--mono); font-size:11px; color:var(--ink-2); }
+  .btn { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    background:transparent; color:var(--ink); border:1px solid var(--ink); padding:5px 11px; cursor:pointer; }
+  .btn:hover { background:var(--ink); color:var(--paper); }
+
+  /* listas de referência */
+  ul.cons { list-style:none; padding:0; margin:0; border:1px solid var(--rule-2); background:var(--panel); }
+  ul.cons li { padding:11px 14px; border-top:1px solid var(--rule); font-size:13px; }
+  ul.cons li:first-child { border-top:0; }
+  ul.cons li.hard { box-shadow:inset 3px 0 0 var(--signal); }
+  ul.cons li.weak { box-shadow:inset 3px 0 0 var(--ochre); }
+  ul.cons b { font-family:var(--disp); font-weight:600; }
+  ul.cons small { color:var(--ink-2); }
+
+  footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule-2);
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-2); line-height:1.8; }
+  footer code { color:var(--ink); }
+
+  @keyframes rise { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:none; } }
+  @keyframes tick { from { opacity:.25; transform:translateY(3px); } to { opacity:1; transform:none; } }
+  @keyframes nope { 0%,100%{transform:none;} 25%{transform:translateX(-3px);} 75%{transform:translateX(3px);} }
+
+  @media (max-width:780px) {
+    .panels { grid-template-columns:1fr; }
+    .row { grid-template-columns:1fr; }
+    .row-label { border-right:0; border-bottom:1px solid var(--rule); }
+    .instrument { position:static; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style></head>
-<body><div class="wrap">
-  <h1>Caixa morfológica viva — __CASE_ID__</h1>
-  <div class="sub">Plataforma <b>idea-waddle</b> · colaboração criativa humano + agente sobre Git ·
-    gerado em __GENERATED__</div>
+<body>
+<div class="topbar"></div>
+<div class="wrap">
+  <header class="masthead">
+    <div class="dateline-row"><span>Caso · __CASE_ID__</span><span>Revisão · __GENERATED__</span></div>
+    <h1 class="title">idea<span class="dot">·</span>waddle</h1>
+    <p class="standfirst">Caixa morfológica viva — análise colaborativa entre humanos e agentes, versionada sobre Git.</p>
+    <hr class="rule-d">
+  </header>
 
-  <div class="stats">
-    <div class="stat"><b>__N_PARAMS__</b><span>parâmetros</span></div>
-    <div class="stat"><b>__TOTAL__</b><span>configurações totais</span></div>
-    <div class="stat"><b>__N_HARD__</b><span>restrições (poda)</span></div>
-    <div class="stat"><b>__VIABLE__</b><span>configurações viáveis</span></div>
-    <div class="stat"><b>__QUOTIENT__</b><span>espaço de solução</span></div>
-  </div>
+  <section class="readout">
+    <div class="metric"><span class="mv">__N_PARAMS__</span><span class="ml">parâmetros</span></div>
+    <div class="metric"><span class="mv">__TOTAL__</span><span class="ml">config. totais</span></div>
+    <div class="metric"><span class="mv">__N_HARD__</span><span class="ml">restrições</span></div>
+    <div class="metric accent"><span class="mv">__VIABLE__</span><span class="ml">config. viáveis</span></div>
+    <div class="metric"><span class="mv">__QUOTIENT__</span><span class="ml">espaço de solução</span></div>
+  </section>
 
-  <div class="panel estpanel">
-    <h3>Estimativas da configuração (QOC) <span class="estnote">— atualiza conforme você seleciona abaixo</span></h3>
+  <section class="instrument">
+    <div class="ihead"><h2>Leitura da configuração</h2><span class="note">atualiza com a seleção &#8595;</span></div>
     <div id="estimates"><div class="empty">Selecione opções na caixa abaixo para estimar custo, potência e energia.</div></div>
-    <div class="hint" style="margin:10px 0 0">Números são <b>placeholders a refinar</b> (premissas em
-      <code>assumptions.yaml</code>; valores por opção em <code>params/*.yaml</code>). Tratar como ordem de grandeza.</div>
-  </div>
+    <p class="note" style="margin:13px 0 0">Valores são placeholders a refinar — premissas em
+      <code>assumptions.yaml</code>, dados por opção em <code>params/*.yaml</code>. Tratar como ordem de grandeza.</p>
+  </section>
 
-  <h2>Explorar a caixa morfológica</h2>
-  <div class="hint">Clique numa célula por linha para montar uma configuração. As opções
-    <b style="color:var(--hard)">incompatíveis</b> com a sua seleção ficam bloqueadas; as
-    <b style="color:var(--weak)">fracas</b> (alerta) seguem selecionáveis. Cada seleção mostra o comentário da célula e os caminhos de restrição ativados.</div>
+  <div class="sec"><span class="no"></span><h2>Caixa morfológica</h2><span class="line"></span></div>
+  <p class="lead">Clique numa célula por linha para montar uma configuração. Opções
+    <b style="color:var(--signal)">incompatíveis</b> com a seleção ficam bloqueadas; as de
+    <b style="color:var(--ochre)">alerta</b> seguem disponíveis. Cada escolha revela comentário, proveniência e caminhos de restrição.</p>
   <div class="gma" id="gma">__ROWS__</div>
 
   <div class="panels">
-    <div class="panel">
-      <h3>Seleção atual <button class="btn" id="clear" style="float:right">Limpar</button></h3>
+    <div class="ledger">
+      <h3>Seleção atual <button class="btn" id="clear">Limpar</button></h3>
       <div id="selection"><div class="empty">Nenhuma célula selecionada.</div></div>
       <div class="space" id="space"></div>
     </div>
-    <div class="panel">
-      <h3>Caminhos de restrição ativos</h3>
+    <div class="ledger">
+      <h3>Caminhos de restrição</h3>
       <div id="restrictions"><div class="empty">Selecione células para ver as restrições disparadas.</div></div>
     </div>
   </div>
 
-  <h2>Critérios de avaliação (QOC)</h2>
+  <div class="sec"><span class="no"></span><h2>Critérios de avaliação</h2><span class="line"></span></div>
   <ul class="cons">__CRITERIA__</ul>
-  <div class="hint">Premissas (placeholders, editáveis em <code>assumptions.yaml</code>): __ASSUMPTIONS__</div>
+  <p class="note" style="margin:10px 0 0">Premissas (placeholders, em <code>assumptions.yaml</code>): __ASSUMPTIONS__</p>
 
-  <h2>Todas as restrições (referência)</h2>
+  <div class="sec"><span class="no"></span><h2>Restrições registradas</h2><span class="line"></span></div>
   <ul class="cons">__CONS__</ul>
 
   <footer>
-    Proveniência registrada por opção/restrição (quem · qual modelo). Diversidade é princípio do projeto —
-    veja o <code>README.md</code>, o <code>AGENTS.md</code> e <code>docs/discovery/</code>.
-    Restrições <span class="badge weak">weak</span> alertam mas não podam.
+    idea·waddle — colaboração criativa humano + agente sobre Git.<br>
+    Proveniência registrada por opção e restrição (quem · qual modelo). Diversidade é princípio do projeto.<br>
+    Consulte <code>README.md</code> · <code>AGENTS.md</code> · <code>docs/discovery/</code> · <code>docs/spec/</code>.
   </footer>
 </div>
 <script>
@@ -358,16 +451,19 @@ function computeEstimates(){
   return {gpus:gpus, capex:capex, powerKw:powerKw, energy:energy, scoreAgg:scoreAgg};
 }
 function fmtBRL(n){ return 'R$ ' + Math.round(n).toLocaleString('pt-BR'); }
-function quantCard(k, v, miss){
-  var inner = (v!=null) ? '<div class="v">'+v+'</div>' : '<div class="miss">'+ (miss||'—') +'</div>';
-  return '<div class="est"><div class="k">'+esc(k)+'</div>'+inner+'</div>';
+function quantCard(k, valHtml, miss){
+  var inner = valHtml ? '<div class="v">'+valHtml+'</div>' : '<div class="miss">'+ (miss||'sem dado') +'</div>';
+  return '<div class="est quant"><div class="k">'+esc(k)+'</div>'+inner+'</div>';
+}
+function gauge(v){
+  var s=''; var on=Math.round(v);
+  for (var i=1;i<=5;i++){ s += '<span class="'+(i<=on?'on':'')+'"></span>'; }
+  return '<div class="gauge">'+s+'</div>';
 }
 function qualCard(k, v){
-  if (v==null) return '<div class="est qual"><div class="k">'+esc(k)+'</div><div class="miss">—</div></div>';
-  var pct = Math.max(0, Math.min(100, (v/5)*100));
-  return '<div class="est qual"><div class="k">'+esc(k)+'</div>'+
-         '<div class="v">'+ (Math.round(v*10)/10) +' <small style="display:inline">/5</small></div>'+
-         '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+  if (v==null) return '<div class="est qual"><div class="k">'+esc(k)+'</div><div class="miss">sem dado</div></div>';
+  return '<div class="est qual"><div class="k">'+esc(k)+'</div>'+gauge(v)+
+         '<div class="qv">'+ (Math.round(v*10)/10) +' / 5</div></div>';
 }
 function renderEstimates(){
   var box = document.getElementById('estimates');
@@ -376,7 +472,7 @@ function renderEstimates(){
   }
   var E = computeEstimates(), cards = [];
   cards.push(quantCard('Total de GPUs', E.gpus!=null ? E.gpus.toLocaleString('pt-BR') : null, 'selecione a escala'));
-  cards.push(quantCard('Custo de capital', E.capex!=null ? fmtBRL(E.capex) : null, 'selecione hardware + escala'));
+  cards.push(quantCard('Custo de capital', E.capex!=null ? fmtBRL(E.capex) : null, 'hardware + escala'));
   cards.push(quantCard('Potência', E.powerKw!=null ? (Math.round(E.powerKw*10)/10)+' kW' : null, 'selecione hardware + escala'));
   cards.push(quantCard('Energia', E.energy!=null ? (fmtBRL(E.energy)+'/mês') : null, 'depende da potência'));
   DATA.criteria.filter(function(c){ return c.kind==='qualitative'; }).forEach(function(c){
@@ -456,7 +552,7 @@ recompute();
 def render_case_html(case: dict, cca: dict, generated: str) -> str:
     # Linhas no padrão GMA: cada parâmetro é uma linha; opções são as células.
     rows = []
-    for p in case["parameters"]:
+    for idx, p in enumerate(case["parameters"]):
         cells = []
         for o in p["options"]:
             prov = o.get("proposed_by", "?")
@@ -464,11 +560,16 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             prov_txt = f"{prov}" + (f" · {model}" if model else "")
             cells.append(
                 f'<div class="opt" data-param="{e(p["id"])}" data-opt="{e(o["id"])}">'
-                f'<span class="opt-label">{e(o.get("label", o["id"]))}</span>'
-                f'<span class="prov">{e(prov_txt)}</span></div>'
+                f'<span class="ol">{e(o.get("label", o["id"]))}</span>'
+                f'<span class="op">{e(prov_txt)}</span></div>'
             )
+        desc = p.get("description", "")
         rows.append(
-            f'<div class="row"><div class="row-label">{e(p["label"])}</div>'
+            f'<div class="row" style="--i:{idx}">'
+            f'<div class="row-label"><span class="rl-no"></span>'
+            f'<span class="rl-name">{e(p["label"])}</span>'
+            + (f'<span class="rl-desc">{e(desc)}</span>' if desc else "")
+            + "</div>"
             f'<div class="row-cells">{"".join(cells)}</div></div>'
         )
 
@@ -578,12 +679,30 @@ def render_index(cases: list[dict]) -> str:
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>idea-waddle</title>
-<style>body{{margin:0;background:#0f1117;color:#e6e8ee;font:16px/1.6 system-ui,sans-serif}}
-.wrap{{max-width:760px;margin:0 auto;padding:40px 24px}}a{{color:#7aa2f7}}
-li{{margin:8px 0}}</style></head>
-<body><div class="wrap">
-<h1>idea-waddle</h1>
-<p>Plataforma de colaboração criativa entre humanos e agentes de IA, usando o Git como espinha dorsal.</p>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{{ --paper:#ece4d3; --panel:#f2ecdf; --ink:#1b1812; --ink-2:#544d3f; --rule:rgba(27,24,18,.16); --rule-2:rgba(27,24,18,.45); --signal:#bf3a1d; --blue:#234a63; }}
+  *{{ box-sizing:border-box; }}
+  body{{ margin:0; color:var(--ink); font-family:'IBM Plex Mono',ui-monospace,monospace; background-color:var(--paper);
+    background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px); background-size:30px 30px; }}
+  .topbar{{ position:fixed; top:0; left:0; right:0; height:5px; background:var(--signal); }}
+  .wrap{{ max-width:760px; margin:0 auto; padding:64px 28px; }}
+  h1{{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(48px,12vw,92px); letter-spacing:-.025em; margin:0 0 8px; line-height:.9; }}
+  h1 .dot{{ color:var(--signal); }}
+  .lead{{ font-family:'Fraunces',serif; font-style:italic; color:var(--ink-2); font-size:18px; max-width:52ch; margin:0; }}
+  h2{{ font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin:40px 0 12px; }}
+  ul{{ list-style:none; padding:0; margin:0; border:1px solid var(--rule-2); background:var(--panel); }}
+  li{{ border-top:1px solid var(--rule); }}
+  li:first-child{{ border-top:0; }}
+  li a{{ display:block; padding:15px 18px; color:var(--ink); text-decoration:none; }}
+  li a:hover{{ background:var(--ink); color:var(--paper); }}
+  a{{ color:var(--blue); }}
+</style></head>
+<body><div class="topbar"></div><div class="wrap">
+<h1>idea<span class="dot">·</span>waddle</h1>
+<p class="lead">Plataforma de colaboração criativa entre humanos e agentes de IA, usando o Git como espinha dorsal.</p>
 <h2>Casos</h2><ul>{items}</ul>
 </div></body></html>"""
 
