@@ -1,0 +1,32 @@
+parameter:
+  id: refrigeracao
+  label: "Refrigeração / energia"
+  description: "Como o calor é dissipado; impacta capex e PUE (eficiência energética)."
+  ibis_issue: null
+  # capex_fixed_brl entra no capex total. PUE permanece global (assumptions.yaml) por ora;
+  # refinar futuramente p/ PUE por tipo de refrigeração. Placeholders a refinar.
+  options:
+    - id: opt.refrigeracao.ar
+      label: "Ar (CRAC/CRAH)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Mais barato e simples; PUE pior; limita densidade de potência."
+      estimates: { capex_fixed_brl: 40000 }
+      scores: { suporte: 5 }
+    - id: opt.refrigeracao.liquido
+      label: "Líquido direto ao chip (DLC)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Melhor PUE e densidade; mais caro e exige infraestrutura hidráulica."
+      estimates: { capex_fixed_brl: 200000 }
+      scores: { suporte: 4 }
+    - id: opt.refrigeracao.imersao
+      label: "Imersão"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "PUE excelente; alto custo e complexidade operacional."
+      estimates: { capex_fixed_brl: 400000 }
+      scores: { suporte: 3 }

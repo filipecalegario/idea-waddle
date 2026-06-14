@@ -58,10 +58,14 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
   - `engine/cca.py`: carrega critérios/premissas; o site agora exibe **Estimativas da configuração** (GPUs, capex, kW, R$/mês, escores com barra) recalculadas a cada seleção, + seção de Critérios (QOC) e premissas.
 - **Validação:** H100 ×32 + Ethernet → capex ≈ R$9,02M · 33,6 kW · R$22.982/mês (ordens de grandeza coerentes).
 
+### 2026-06-14 — Passo 2: parâmetros faltantes do Caso 0
+- **O que foi feito:** adicionados 5 parâmetros à caixa do CIn — [`07-refrigeracao`](../../cases/cin-ufpe-inference-cluster/morphology/params/07-refrigeracao.yaml), [`08-armazenamento`](../../cases/cin-ufpe-inference-cluster/morphology/params/08-armazenamento.yaml), [`09-financiamento`](../../cases/cin-ufpe-inference-cluster/morphology/params/09-financiamento.yaml), [`10-modelos-llm`](../../cases/cin-ufpe-inference-cluster/morphology/params/10-modelos-llm.yaml), [`11-politicas-uso`](../../cases/cin-ufpe-inference-cluster/morphology/params/11-politicas-uso.yaml) — com estimates/scores placeholder e 3 novas restrições (refrigeração × escala/hardware).
+- **Resultado:** **11 parâmetros · 419.904 configurações totais · 253.692 viáveis (60,4%)**. Refrigeração e armazenamento entram no capex; "Portfólio diverso" de modelos conecta ao princípio de diversidade.
+
 ## Estado atual (snapshot)
 - **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclo **001 (abertura)** aberto, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
-- **Camada ativa:** caixa morfológica + CCA + **camada QOC (critérios + estimativas)** no site vivo interativo. Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
+- **Camada ativa:** caixa morfológica (11 params) + CCA + **camada QOC (critérios + estimativas)** no site vivo interativo. Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
 - **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) para o site ir ao ar.
 
 ## Decisões em aberto
@@ -75,7 +79,7 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 
 ## Próximos passos candidatos
 1. ✅ ~~Acoplar a **camada de critérios (QOC) + estimativas** de custo/energia por configuração.~~ (feito 2026-06-14)
-2. Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.
+2. ✅ ~~Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.~~ (feito 2026-06-14)
 3. Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).
 4. Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.
 5. Habilitar o GitHub Pages e divulgar a chamada pública.

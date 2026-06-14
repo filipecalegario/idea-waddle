@@ -1,0 +1,25 @@
+parameter:
+  id: politicas
+  label: "Políticas de uso / cota"
+  description: "Como o acesso à inferência é distribuído e regulado na comunidade."
+  ibis_issue: null
+  # Sem estimativas quantitativas. Placeholders a refinar.
+  options:
+    - id: opt.politicas.aberto_cota
+      label: "Aberto a todos com cota individual"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Máximo alcance; exige gestão de cotas e prevenção de abuso."
+    - id: opt.politicas.por_laboratorio
+      label: "Alocação por laboratório/projeto"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Previsível e governável; menos espontâneo p/ a comunidade ampla."
+    - id: opt.politicas.prioridade_pesquisa
+      label: "Fila com prioridade p/ pesquisa"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Favorece produção científica; pode frustrar uso exploratório/ensino."

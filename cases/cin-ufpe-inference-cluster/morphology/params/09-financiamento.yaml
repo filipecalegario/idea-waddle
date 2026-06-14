@@ -1,0 +1,28 @@
+parameter:
+  id: financiamento
+  label: "Modelo de financiamento"
+  description: "Como o investimento (capex) e o custeio (energia/operação) são bancados."
+  ibis_issue: null
+  # scores 1-5 (placeholders a refinar). Sem estimativas de capex próprias.
+  options:
+    - id: opt.financiamento.diretoria_cin
+      label: "Diretoria do CIn"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Decisão e recursos internos; alinhado ao público-alvo da chamada."
+      scores: { risco_fornecimento: 4 }
+    - id: opt.financiamento.fomento
+      label: "Agência de fomento (FACEPE/CNPq/FINEP)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Maior volume possível; depende de editais e prazos."
+      scores: { risco_fornecimento: 3 }
+    - id: opt.financiamento.parceria_doacao
+      label: "Parceria / doação (empresa ou nuvem)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Reduz capex; pode amarrar a fornecedor e tem contrapartidas."
+      scores: { risco_fornecimento: 3 }

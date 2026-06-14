@@ -60,3 +60,27 @@ constraints:
     by: "agent:discovery"
     model: "claude-opus-4-8"
     note: "Suporte de Ollama a Ascend é limitado/imaturo — alerta, não poda."
+
+  - a: opt.refrigeracao.ar
+    b: opt.escala.medio
+    type: empirical
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Refrigeração a ar pode ser insuficiente p/ a densidade de um cluster médio — alerta."
+
+  - a: opt.refrigeracao.imersao
+    b: opt.escala.no_unico
+    type: normative
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "Imersão tende a ser custo desproporcional p/ um nó único — alerta."
+
+  - a: opt.refrigeracao.ar
+    b: opt.aceleracao.mi300
+    type: empirical
+    degree: weak
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "MI300X (TDP alto) tensiona refrigeração a ar — alerta."

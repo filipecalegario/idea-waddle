@@ -1,0 +1,31 @@
+parameter:
+  id: armazenamento
+  label: "Armazenamento"
+  description: "Onde ficam pesos de modelos, caches e dados de apoio à inferência."
+  ibis_issue: null
+  # capex_fixed_brl entra no capex total. Placeholders a refinar.
+  options:
+    - id: opt.armazenamento.nfs
+      label: "NAS / NFS (SSD)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Simples e barato; suficiente p/ servir pesos de modelos em escala menor."
+      estimates: { capex_fixed_brl: 80000 }
+      scores: { suporte: 5 }
+    - id: opt.armazenamento.paralelo
+      label: "Sistema de arquivos paralelo (Lustre/BeeGFS)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Alto throughput p/ muitos nós; mais complexo de operar."
+      estimates: { capex_fixed_brl: 250000 }
+      scores: { suporte: 4 }
+    - id: opt.armazenamento.object
+      label: "Object storage (S3/MinIO)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Escalável e flexível p/ artefatos; latência maior p/ acesso direto."
+      estimates: { capex_fixed_brl: 120000 }
+      scores: { suporte: 4 }

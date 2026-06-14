@@ -1,0 +1,35 @@
+parameter:
+  id: modelos
+  label: "Modelos de LLM a servir"
+  description: "Quais famílias de modelos seriam disponibilizadas à comunidade."
+  ibis_issue: null
+  # scores 1-5 (placeholders a refinar). Conecta ao princípio de diversidade do projeto.
+  options:
+    - id: opt.modelos.llama
+      label: "Llama (Meta, aberto)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Ampla adoção e tooling; licença com restrições de uso."
+      scores: { soberania: 4 }
+    - id: opt.modelos.qwen_deepseek
+      label: "Qwen / DeepSeek (abertos, China)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Forte desempenho/custo; diversifica a origem dos modelos."
+      scores: { soberania: 4 }
+    - id: opt.modelos.mistral
+      label: "Mistral (aberto, Europa)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Modelos eficientes; diversidade de origem (europeia)."
+      scores: { soberania: 4 }
+    - id: opt.modelos.diversidade
+      label: "Portfólio diverso (múltiplas famílias)"
+      proposed_by: "agent:discovery"
+      model: "claude-opus-4-8"
+      status: proposed
+      rationale: "Alinha-se ao princípio de diversidade; mais esforço de operação/curadoria."
+      scores: { soberania: 5 }
