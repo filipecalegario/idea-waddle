@@ -53,3 +53,12 @@ criteria:
     scale: "1-5 (maior = melhor)"
     direction: maximize
     aggregation: min
+
+  # Critério proposto pela 2ª opinião (diversidade) — ver cycles/002-segunda-opiniao.md
+  - id: sustentabilidade
+    label: "Sustentabilidade / eficiência energética"
+    kind: qualitative
+    scale: "1-5 (maior = mais sustentável)"
+    direction: maximize
+    aggregation: min
+    note: "Proposto por agent:revisor-2 (perspectiva diversa simulada)."

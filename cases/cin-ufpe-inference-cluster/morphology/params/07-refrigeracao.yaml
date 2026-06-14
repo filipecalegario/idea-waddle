@@ -13,7 +13,7 @@ parameter:
       status: proposed
       rationale: "Mais barato e simples; PUE pior; limita densidade de potência."
       estimates: { capex_fixed_brl: 40000 }
-      scores: { suporte: 5 }
+      scores: { suporte: 5, sustentabilidade: 2 }
     - id: opt.refrigeracao.liquido
       label: "Líquido direto ao chip (DLC)"
       proposed_by: "agent:discovery"
@@ -21,7 +21,7 @@ parameter:
       status: proposed
       rationale: "Melhor PUE e densidade; mais caro e exige infraestrutura hidráulica."
       estimates: { capex_fixed_brl: 200000 }
-      scores: { suporte: 4 }
+      scores: { suporte: 4, sustentabilidade: 4 }
     - id: opt.refrigeracao.imersao
       label: "Imersão"
       proposed_by: "agent:discovery"
@@ -29,4 +29,4 @@ parameter:
       status: proposed
       rationale: "PUE excelente; alto custo e complexidade operacional."
       estimates: { capex_fixed_brl: 400000 }
-      scores: { suporte: 3 }
+      scores: { suporte: 3, sustentabilidade: 5 }

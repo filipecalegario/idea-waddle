@@ -4,7 +4,7 @@ parameter:
   description: "Que acelerador(es) formam a base do cluster de inferência."
   # Gancho p/ camadas futuras (IBIS/QOC): id da Issue/Questão associada.
   ibis_issue: null
-  # estimates/scores são PLACEHOLDERS a refinar (proveniência agent:discovery).
+  # estimates/scores são PLACEHOLDERS a refinar (proveniência indicada por opção).
   # estimates.capex_per_gpu_brl e tdp_w_per_gpu são multiplicados por n_gpus (ver 04-escala).
   options:
     - id: opt.aceleracao.h100
@@ -14,7 +14,7 @@ parameter:
       status: proposed
       rationale: "Ecossistema CUDA maduro; melhor suporte de software de serving."
       estimates: { capex_per_gpu_brl: 280000, tdp_w_per_gpu: 700 }
-      scores: { soberania: 2, risco_fornecimento: 3, suporte: 5 }
+      scores: { soberania: 2, risco_fornecimento: 3, suporte: 5, sustentabilidade: 3 }
     - id: opt.aceleracao.l40s
       label: "NVIDIA L40S / RTX 6000 Ada (custo-benefício)"
       proposed_by: "agent:discovery"
@@ -22,7 +22,7 @@ parameter:
       status: proposed
       rationale: "Menor custo por placa; boa p/ inferência de modelos médios."
       estimates: { capex_per_gpu_brl: 90000, tdp_w_per_gpu: 350 }
-      scores: { soberania: 2, risco_fornecimento: 4, suporte: 5 }
+      scores: { soberania: 2, risco_fornecimento: 4, suporte: 5, sustentabilidade: 4 }
     - id: opt.aceleracao.mi300
       label: "AMD Instinct MI300X"
       proposed_by: "agent:discovery"
@@ -30,7 +30,7 @@ parameter:
       status: proposed
       rationale: "Alta VRAM (192GB); alternativa ao monopólio NVIDIA; ROCm amadurecendo."
       estimates: { capex_per_gpu_brl: 200000, tdp_w_per_gpu: 750 }
-      scores: { soberania: 2, risco_fornecimento: 3, suporte: 3 }
+      scores: { soberania: 2, risco_fornecimento: 3, suporte: 3, sustentabilidade: 2 }
     - id: opt.aceleracao.ascend
       label: "Huawei Ascend 910B"
       proposed_by: "agent:discovery"
@@ -38,4 +38,13 @@ parameter:
       status: proposed
       rationale: "Opção do mercado chinês; relevante diante de restrições de exportação."
       estimates: { capex_per_gpu_brl: 130000, tdp_w_per_gpu: 400 }
-      scores: { soberania: 3, risco_fornecimento: 2, suporte: 2 }
+      scores: { soberania: 3, risco_fornecimento: 2, suporte: 2, sustentabilidade: 3 }
+    # Contribuição da 2ª opinião (diversidade) — ver cycles/002-segunda-opiniao.md
+    - id: opt.aceleracao.consumo
+      label: "GPUs de consumo / refurbished (RTX 4090/5090)"
+      proposed_by: "agent:revisor-2"
+      model: "claude-opus-4-8 (perspectiva diversa simulada)"
+      status: proposed
+      rationale: "Capex baixíssimo e ótima relação custo/throughput; porém sem ECC/NVLink, confiabilidade menor e a licença da NVIDIA restringe uso em data center."
+      estimates: { capex_per_gpu_brl: 30000, tdp_w_per_gpu: 450 }
+      scores: { soberania: 2, risco_fornecimento: 3, suporte: 2, sustentabilidade: 2 }

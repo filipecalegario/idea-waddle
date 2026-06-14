@@ -108,3 +108,20 @@ constraints:
     by: "agent:discovery"
     model: "claude-opus-4-8"
     note: "MI300X (TDP alto) tensiona refrigeração a ar — alerta."
+
+  # Restrições da 2ª opinião (diversidade) — ver cycles/002-segunda-opiniao.md
+  - a: opt.aceleracao.consumo
+    b: opt.fornecimento.cn
+    type: empirical
+    degree: incompatible
+    by: "agent:revisor-2"
+    model: "claude-opus-4-8 (perspectiva diversa simulada)"
+    note: "GPUs de consumo NVIDIA são do mercado americano; não vêm pela via chinesa."
+
+  - a: opt.aceleracao.consumo
+    b: opt.escala.medio
+    type: normative
+    degree: weak
+    by: "agent:revisor-2"
+    model: "claude-opus-4-8 (perspectiva diversa simulada)"
+    note: "Confiabilidade e licenciamento de GPUs de consumo são frágeis em escala média — alerta."

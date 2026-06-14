@@ -66,8 +66,13 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Quadro de estimativas movido para o topo** (logo após os indicadores, antes da caixa) e fixado (sticky): atualiza ao vivo conforme a seleção muda na caixa abaixo. Motivo: visibilidade imediata para quem usa.
 - **Correção de consistência mercado × placas:** adicionadas restrições recíprocas — selecionar **mercado chinês** agora bloqueia H100/L40S/MI300 (sobra Ascend); **mercado americano** bloqueia Ascend. Espaço viável: 178.848 (42,6%) com 9 restrições.
 
+### 2026-06-14 — Passo 3: segunda opinião (diversidade) — SIMULADA
+- **Decisão (consulta ao usuário):** simular a 2ª opinião agora, com perspectiva deliberadamente diferente, registrada como contribuição rastreável `agent:revisor-2` (marcada como **simulação** de diversidade — não outra família real; substituir por revisão de família distinta quando possível).
+- **O que foi feito:** ciclo [`002-segunda-opiniao.md`](../../cases/cin-ufpe-inference-cluster/cycles/002-segunda-opiniao.md) com crítica à semeadura (foco em capex, ausência de opex/sustentabilidade, lock-in, alternativas frugais). Contribuições reais à caixa por `agent:revisor-2`: nova opção *GPUs de consumo/refurbished*; novo critério *Sustentabilidade*; 2 restrições (consumo × mercado chinês / × escala média). Divergências Q-A..Q-F (provisão nuvem, federação c/ Apuana, contestar restrições, opex/prazo/carbono) deixadas como Questões para debate.
+- **Resultado:** 11 params · **524.880 configurações · 233.280 viáveis (44,4%)** · 10 restrições. Proveniência distinta (`agent:discovery` vs `agent:revisor-2`) visível no site.
+
 ## Estado atual (snapshot)
-- **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclo **001 (abertura)** aberto, em modo *divergir*.
+- **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
 - **Camada ativa:** caixa morfológica (11 params) + CCA + **camada QOC (critérios + estimativas)** no site vivo interativo. Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
 - **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) para o site ir ao ar.
@@ -84,7 +89,7 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 ## Próximos passos candidatos
 1. ✅ ~~Acoplar a **camada de critérios (QOC) + estimativas** de custo/energia por configuração.~~ (feito 2026-06-14)
 2. ✅ ~~Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.~~ (feito 2026-06-14)
-3. Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).
+3. ✅ ~~Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).~~ (feito 2026-06-14, SIMULADO — substituir por família real)
 4. Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.
 5. Habilitar o GitHub Pages e divulgar a chamada pública.
 

@@ -32,7 +32,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CASES_DIR = ROOT / "cases"
 SITE_DIR = ROOT / "site"
 # Limite de segurança para enumeração do produto cartesiano.
-ENUM_LIMIT = 500_000
+ENUM_LIMIT = 2_000_000
 
 
 def load_case(case_dir: Path) -> dict:
