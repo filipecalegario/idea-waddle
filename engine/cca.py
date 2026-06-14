@@ -288,7 +288,7 @@ def render_evolution(ev: dict) -> str:
     if not ev or not ev["commits"]:
         return "<p class='note'>Sem histórico de Git disponível para este caso.</p>"
     commits, index, maxcol = ev["commits"], ev["index"], ev["maxcol"]
-    ROWH, GAP, PADX, R = 50, 22, 16, 5
+    ROWH, GAP, PADX, R = 64, 22, 16, 5
     gutter = PADX * 2 + maxcol * GAP
     height = len(commits) * ROWH
     lane_colors = ["#bf3a1d", "#234a63", "#5e6a2b", "#9a6a12", "#6d4a7a", "#3a6a6a"]
@@ -327,20 +327,21 @@ def render_evolution(ev: dict) -> str:
     )
 
     rows = []
+    MAXC = 6
     for c in commits:
-        chips = ""
-        for x in c["added"]:
-            chips += f'<span class="chip add">+ {e(x)}</span>'
-        for x in c["removed"]:
-            chips += f'<span class="chip rem">− {e(x)}</span>'
+        items = [("add", "+ " + x) for x in c["added"]] + [("rem", "− " + x) for x in c["removed"]]
+        chips = "".join(f'<span class="chip {cls}">{e(txt)}</span>' for cls, txt in items[:MAXC])
+        if len(items) > MAXC:
+            chips += f'<span class="chip more">+{len(items) - MAXC}</span>'
         subj = e(c["subject"])
         if ev["repo_url"]:
             subj = f'<a href="{ev["repo_url"]}/commit/{c["hash"]}">{subj}</a>'
+        chips_html = f'<div class="evo-chips" title="{e(", ".join(t for _, t in items))}">{chips}</div>' if items else ""
         rows.append(
             f'<li class="{"evo-on" if c["touched"] else "evo-off"}" style="height:{ROWH}px">'
-            f'<div class="evo-subj">{subj}</div>'
+            f'<div class="evo-subj" title="{e(c["subject"])}">{subj}</div>'
             f'<div class="evo-meta">{e(c["date"])} · {e(c["author"])} · <code>{e(c["short"])}</code></div>'
-            f'{f"<div class=evo-chips>{chips}</div>" if chips else ""}</li>'
+            f'{chips_html}</li>'
         )
     return (
         f'<div class="evo" style="--gutter:{gutter}px">{svg}'
@@ -555,17 +556,21 @@ CASE_TEMPLATE = r"""<!doctype html>
   .evo { position:relative; min-width:520px; }
   .evo-svg { position:absolute; left:0; top:0; }
   .evo-list { list-style:none; margin:0; padding:0; }
-  .evo-list li { display:flex; flex-direction:column; justify-content:center; gap:2px;
-    padding:4px 10px 4px var(--gutter); border-bottom:1px solid var(--rule); }
-  .evo-list li.evo-off { opacity:.55; }
-  .evo-subj { font-family:var(--disp); font-weight:600; font-size:14px; line-height:1.15; }
+  .evo-list li { display:flex; flex-direction:column; justify-content:center; gap:3px;
+    padding:4px 10px 4px var(--gutter); border-bottom:1px solid var(--rule); overflow:hidden; }
+  .evo-list li.evo-off { opacity:.5; }
+  .evo-subj { font-family:var(--disp); font-weight:600; font-size:13.5px; line-height:1.15;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .evo-subj a { color:var(--ink); text-decoration:none; }
   .evo-subj a:hover { color:var(--blue); }
-  .evo-meta { font-family:var(--mono); font-size:10.5px; color:var(--ink-2); }
-  .evo-chips { margin-top:2px; display:flex; flex-wrap:wrap; gap:4px; }
-  .chip { font-family:var(--mono); font-size:10px; padding:1px 6px; border:1px solid var(--rule-2); }
+  .evo-meta { font-family:var(--mono); font-size:10.5px; color:var(--ink-2);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .evo-chips { display:flex; flex-wrap:nowrap; gap:4px; overflow:hidden; }
+  .chip { flex:none; font-family:var(--mono); font-size:10px; padding:1px 6px;
+    border:1px solid var(--rule-2); white-space:nowrap; }
   .chip.add { color:var(--ok); border-color:var(--ok); }
   .chip.rem { color:var(--signal); border-color:var(--signal); }
+  .chip.more { color:var(--ink-2); }
 
   footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule-2);
     font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-2); line-height:1.8; }
