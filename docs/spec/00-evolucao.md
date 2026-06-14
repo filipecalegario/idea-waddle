@@ -116,8 +116,12 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Ciclo de vida (sem apagar):** opções com `status: superseded|rejected` + `reason` aparecem **riscadas com o motivo** e **saem do cálculo** (ex.: `opt.protocolo.custom` aposentada → total do caso da plataforma caiu de 327.680 p/ 245.760). lint avisa se aposentar sem `reason`.
 - Mostra os três eixos pedidos: o que entrou/saiu (chips + status), por quê (mensagem/`reason`/`claim`), e a evolução no tempo (grafo). Bifurcações/merges aparecem conforme PRs reais são mesclados.
 
+### 2026-06-14 — Estimativas genéricas (dirigidas por dados) — motor agnóstico
+- **Problema (apontado pelo usuário):** o cálculo de estimativas estava acoplado ao cluster (`n_gpus`, `capex_per_gpu_brl`, PUE…) dentro do motor.
+- **Solução:** o caso declara suas **métricas** (fórmulas) em `morphology/metrics.yaml`; o motor só soma os campos `estimates` das opções + `assumptions` e **avalia as expressões** (avaliador de expressão seguro em JS, sem `eval`). O modelo de custo do cluster saiu do motor e foi para o repo do CIn (`metrics.yaml`). O caso da plataforma não tem `metrics.yaml` → não exibe cards quantitativos (prova da genericidade). `lint` valida `metrics.yaml`. Corrigido também um NBSP residual no template.
+
 ## Estado atual (snapshot)
-- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
+- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** + motor agnóstico de domínio (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
 - **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
 - **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.

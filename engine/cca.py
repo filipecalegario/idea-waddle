@@ -87,6 +87,12 @@ def load_case(case_dir: Path) -> dict:
         argdata = yaml.safe_load(argfile.read_text(encoding="utf-8")) or {}
         arguments = argdata.get("arguments", []) or []
 
+    metrics = []
+    mfile = case_dir / "morphology" / "metrics.yaml"
+    if mfile.exists():
+        mdata = yaml.safe_load(mfile.read_text(encoding="utf-8")) or {}
+        metrics = mdata.get("metrics", []) or []
+
     return {
         "id": case_dir.resolve().name,
         "parameters": params,
@@ -94,6 +100,7 @@ def load_case(case_dir: Path) -> dict:
         "criteria": criteria,
         "assumptions": assumptions,
         "arguments": arguments,
+        "metrics": metrics,
     }
 
 
@@ -716,23 +723,37 @@ function aggScore(id, vals){
   if (agg==='sum') return vals.reduce(function(a,b){return a+b;},0);
   return Math.min.apply(null, vals);
 }
+function evalExpr(expr, scope){
+  var toks = String(expr).match(/[A-Za-z_][A-Za-z0-9_]*|\d+\.?\d*|[()+\-*/]/g) || [];
+  var pos = 0;
+  function peek(){ return toks[pos]; }
+  function pE(){ var v=pT(); while(peek()==='+'||peek()==='-'){ var o=toks[pos++]; var r=pT(); v=(o==='+')?v+r:v-r; } return v; }
+  function pT(){ var v=pF(); while(peek()==='*'||peek()==='/'){ var o=toks[pos++]; var r=pF(); v=(o==='*')?v*r:v/r; } return v; }
+  function pF(){ var t=peek(); if(t==='('){ pos++; var v=pE(); pos++; return v; } if(t==='-'){ pos++; return -pF(); } pos++;
+    if(t && /^[A-Za-z_]/.test(t)) return Number(scope[t])||0; return parseFloat(t); }
+  return pE();
+}
+// Estimativas GENÉRICAS: o caso declara métricas (fórmulas) em metrics.yaml; o
+// motor soma os campos 'estimates' das opções selecionadas + constantes
+// (assumptions) e avalia cada expressão. Nada específico de domínio aqui.
 function computeEstimates(){
-  var A = DATA.assumptions || {};
-  var gpus=null, capexPerGpu=null, tdp=null, capexFixed=0;
-  var scoreAgg = {};
+  var sums={}, provided={}, scoreAgg={};
   Object.keys(selected).forEach(function(pid){
-    var o = OPT[selected[pid]], est = o.estimates||{}, sc = o.scores||{};
-    if (est.n_gpus!=null) gpus = est.n_gpus;
-    if (est.capex_per_gpu_brl!=null) capexPerGpu = est.capex_per_gpu_brl;
-    if (est.tdp_w_per_gpu!=null) tdp = est.tdp_w_per_gpu;
-    if (est.capex_fixed_brl!=null) capexFixed += est.capex_fixed_brl;
+    var o=OPT[selected[pid]], est=o.estimates||{}, sc=o.scores||{};
+    Object.keys(est).forEach(function(k){ sums[k]=(sums[k]||0)+est[k]; provided[k]=true; });
     Object.keys(sc).forEach(function(k){ (scoreAgg[k]=scoreAgg[k]||[]).push(sc[k]); });
   });
-  var capex = (gpus!=null && capexPerGpu!=null) ? gpus*capexPerGpu + capexFixed : null;
-  var powerKw = (gpus!=null && tdp!=null && A.pue!=null) ? gpus*tdp/1000*A.pue : null;
-  var energy = (powerKw!=null && A.hours_per_month!=null && A.tariff_brl_per_kwh!=null)
-      ? powerKw*A.hours_per_month*A.tariff_brl_per_kwh : null;
-  return {gpus:gpus, capex:capex, powerKw:powerKw, energy:energy, scoreAgg:scoreAgg};
+  var scope={}, A=DATA.assumptions||{};
+  Object.keys(A).forEach(function(k){ scope[k]=A[k]; });
+  Object.keys(sums).forEach(function(k){ scope[k]=sums[k]; });
+  var metrics=[];
+  (DATA.metrics||[]).forEach(function(m){
+    var ok = !((m.requires||[]).some(function(r){ return !provided[r]; }));
+    var val = ok ? evalExpr(m.expr, scope) : null;
+    if(val!=null && isFinite(val)) scope[m.id]=val; else val=null;
+    metrics.push({m:m, val:val});
+  });
+  return {metrics:metrics, scoreAgg:scoreAgg};
 }
 function fmtBRL(n){ return 'R$ ' + Math.round(n).toLocaleString('pt-BR'); }
 function quantCard(k, valHtml, miss){
@@ -749,26 +770,30 @@ function qualCard(k, v){
   return '<div class="est qual"><div class="k">'+esc(k)+'</div>'+gauge(v)+
          '<div class="qv">'+ (Math.round(v*10)/10) +' / 5</div></div>';
 }
+function fmtMetric(m, v){
+  var f=m.format, s;
+  if(f==='brl') s=fmtBRL(v);
+  else if(f==='int') s=Math.round(v).toLocaleString('pt-BR');
+  else if(f==='number1') s=(Math.round(v*10)/10).toLocaleString('pt-BR');
+  else s=(Math.round(v*100)/100).toLocaleString('pt-BR');
+  if(m.unit) s+=' <span class="u">'+esc(m.unit)+'</span>';
+  if(m.suffix) s+=' <span class="u">'+esc(m.suffix)+'</span>';
+  return s;
+}
 function renderEstimates(){
-  var box = document.getElementById('estimates');
-  if (!Object.keys(selected).length){
-    box.innerHTML = '<div class="empty">Selecione opções para estimar custo, potência e energia.</div>'; return;
-  }
-  var E = computeEstimates(), cards = [];
-  cards.push(quantCard('Total de GPUs', E.gpus!=null ? E.gpus.toLocaleString('pt-BR') : null, 'selecione a escala'));
-  cards.push(quantCard('Custo de capital', E.capex!=null ? fmtBRL(E.capex) : null, 'hardware + escala'));
-  cards.push(quantCard('Potência', E.powerKw!=null ? (Math.round(E.powerKw*10)/10)+' kW' : null, 'selecione hardware + escala'));
-  cards.push(quantCard('Energia', E.energy!=null ? (fmtBRL(E.energy)+'/mês') : null, 'depende da potência'));
+  var box=document.getElementById('estimates');
+  if(!Object.keys(selected).length){ box.innerHTML='<div class="empty">Selecione opções na caixa abaixo para ver as estimativas.</div>'; return; }
+  var E=computeEstimates(), cards=[];
+  E.metrics.forEach(function(r){ cards.push(quantCard(r.m.label, r.val!=null? fmtMetric(r.m, r.val): null, r.m.missing||'sem dado')); });
   var wsum=0, wtot=0;
   DATA.criteria.filter(function(c){ return c.kind==='qualitative'; }).forEach(function(c){
-    var v = aggScore(c.id, E.scoreAgg[c.id]);
-    cards.push(qualCard(c.label, v));
-    if (v!=null){ var w=c.weight||1; wsum+=v*w; wtot+=w; }
+    var v=aggScore(c.id, E.scoreAgg[c.id]); cards.push(qualCard(c.label, v));
+    if(v!=null){ var w=c.weight||1; wsum+=v*w; wtot+=w; }
   });
-  if (wtot>0){ cards.push(qualCard('Índice QOC (ponderado)', wsum/wtot)); }
-  box.innerHTML = '<div class="est-grid">'+cards.join('')+'</div>';
+  if(wtot>0) cards.push(qualCard('Índice QOC (ponderado)', wsum/wtot));
+  box.innerHTML = cards.length ? '<div class="est-grid">'+cards.join('')+'</div>'
+    : '<div class="empty">Sem métricas ou critérios definidos para este caso.</div>';
 }
-
 function renderSelection(selIds){
   var box = document.getElementById('selection');
   if (!selIds.length){ box.innerHTML = '<div class="empty">Nenhuma célula selecionada.</div>'; return; }
@@ -1027,6 +1052,7 @@ def render_case_html(case: dict, cca: dict, generated: str, case_dir: Path | Non
         ],
         "criteria": case.get("criteria", []),
         "assumptions": case.get("assumptions", {}),
+        "metrics": case.get("metrics", []),
     }
     data_json = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 

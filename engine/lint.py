@@ -229,6 +229,31 @@ def lint_case(case_dir: Path, rep: Report) -> None:
                 if tgt not in arg_ids:
                     rep.err(rel(argfile), f"{a.get('id')}: ataca argumento inexistente '{tgt}'")
 
+    # 3c) métricas (estimativas derivadas — genéricas, por caso)
+    mfile = case_dir / "morphology" / "metrics.yaml"
+    if mfile.exists():
+        d = load_yaml(mfile, rep) or {}
+        mids: set = set()
+        for m in d.get("metrics", []) or []:
+            mid = m.get("id")
+            if not mid:
+                rep.err(rel(mfile), "métrica sem id")
+                continue
+            if mid in mids:
+                rep.err(rel(mfile), f"id de métrica duplicado: {mid}")
+            mids.add(mid)
+            if not m.get("label"):
+                rep.err(rel(mfile), f"{mid}: label ausente")
+            expr = m.get("expr")
+            if not expr:
+                rep.err(rel(mfile), f"{mid}: expr ausente")
+            elif not re.fullmatch(r"[\w+\-*/(). ]+", str(expr)):
+                rep.err(rel(mfile), f"{mid}: expr contém caracteres não permitidos")
+            if m.get("format") and m["format"] not in {"brl", "int", "number", "number1"}:
+                rep.warn(rel(mfile), f"{mid}: format '{m['format']}' desconhecido")
+            if m.get("requires") and not isinstance(m["requires"], list):
+                rep.err(rel(mfile), f"{mid}: requires deve ser uma lista")
+
     # 4) ciclos (linha do tempo)
     cyc = case_dir / "cycles"
     if cyc.is_dir():

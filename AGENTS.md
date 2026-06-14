@@ -66,7 +66,21 @@ Esquemas detalhados de parâmetros, opções, restrições e argumentos estão e
 
 ### As quatro camadas (todas ativas no motor)
 1. **Solução — caixa morfológica + CCA** (`params/*.yaml`, `constraints.yaml`): opções e restrições; o motor poda configurações inviáveis.
-2. **Avaliação — QOC** (`criteria.yaml` + `scores`/`estimates` nas opções): critérios (com `weight` opcional) e a matriz opções × critérios; o site mostra um *Índice QOC* ponderado por configuração.
+2. **Avaliação — QOC** (`criteria.yaml` + `scores`/`estimates` nas opções): critérios qualitativos (com `weight` opcional), a matriz opções × critérios e um *Índice QOC* ponderado. **Estimativas quantitativas são genéricas e dirigidas por dados:** o caso declara suas métricas (fórmulas) em `morphology/metrics.yaml` — o motor soma os campos `estimates` das opções selecionadas + constantes (`assumptions.yaml`) e avalia cada expressão. Nada de domínio específico no motor. Formato:
+   ```yaml
+   metrics:
+     - id: capex
+       label: "Custo de capital"
+       expr: "n_gpus * capex_per_gpu_brl + capex_fixed_brl"  # nomes = campos estimates somados + assumptions
+       format: brl            # brl | int | number | number1
+       requires: [n_gpus, capex_per_gpu_brl]                 # se faltar contribuinte, mostra 'missing'
+       missing: "selecione hardware + escala"
+     - id: energy
+       label: "Energia"
+       expr: "power_kw * hours_per_month * tariff_brl_per_kwh"  # pode usar métricas anteriores (power_kw)
+       format: brl
+       suffix: "/mês"
+   ```
 3. **Discussão — IBIS** (`arguments.yaml`): cada parâmetro é uma Questão; suas opções são Posições; argumentos `pro`/`con` (com `target` numa opção) são os Pros/Cons.
 4. **Argumentação — Dung** (`attacks` em `arguments.yaml`): refutações entre argumentos formam um grafo; o motor calcula a **extensão grounded** (quais argumentos sobrevivem). Análogo argumentativo do CCA.
 
