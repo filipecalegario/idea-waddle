@@ -26,6 +26,8 @@ import html
 import itertools
 import json
 import os
+import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,6 +45,12 @@ CASES_DIR = Path(os.environ.get("IW_CASES", ROOT / "cases"))
 SITE_DIR = Path(os.environ.get("IW_SITE", ROOT / "site"))
 # Limite de segurança para enumeração do produto cartesiano.
 ENUM_LIMIT = 2_000_000
+# Status que aposentam uma opção (não é apagada — sai do cálculo, fica visível riscada).
+RETIRED = {"superseded", "rejected"}
+
+
+def active_options(p: dict) -> list:
+    return [o for o in p.get("options", []) if o.get("status") not in RETIRED]
 
 
 def load_case(case_dir: Path) -> dict:
@@ -92,7 +100,7 @@ def load_case(case_dir: Path) -> dict:
 def compute_cca(case: dict) -> dict:
     """Roda o CCA: poda configurações que contêm algum par incompatível."""
     params = case["parameters"]
-    option_ids = [[o["id"] for o in p["options"]] for p in params]
+    option_ids = [[o["id"] for o in active_options(p)] for p in params]
 
     total = 1
     for ids in option_ids:
@@ -167,6 +175,170 @@ def grounded_extension(arguments: list) -> dict:
                 label[i] = "out"
                 changed = True
     return {i: label.get(i, "undecided") for i in ids}
+
+
+def _git(case_dir: Path, *args: str):
+    """Roda git no diretório do caso; retorna stdout ou None se falhar."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(case_dir), *args],
+            capture_output=True, text=True, timeout=30,
+        )
+        return out.stdout if out.returncode == 0 else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _repo_url(case_dir: Path):
+    url = _git(case_dir, "remote", "get-url", "origin")
+    if not url:
+        return None
+    url = url.strip()
+    m = re.search(r"github\.com[:/]([^/]+/[^/]+?)(?:\.git)?$", url)
+    return f"https://github.com/{m.group(1)}" if m else None
+
+
+_ID_RE = re.compile(r"\b(?:id|a|b):\s*(opt\.[\w.]+|arg\.[\w.]+)")
+
+
+def git_evolution(case_dir: Path, limit: int = 80) -> dict | None:
+    """Reconstrói o grafo de evolução (commits que tocam a discussão) a partir do
+    Git: nós = commits (com +adicionado/−removido), arestas = pais (bifurca/merge)."""
+    log = _git(
+        case_dir, "log", f"-n{limit}",
+        "--pretty=format:%H%x1f%h%x1f%P%x1f%an%x1f%aI%x1f%s",
+    )
+    if not log:
+        return None
+    commits = []
+    index = {}
+    for line in log.splitlines():
+        parts = line.split("\x1f")
+        if len(parts) != 6:
+            continue
+        h, short, par, author, date, subj = parts
+        c = {
+            "hash": h, "short": short,
+            "parents": [p for p in par.split() if p],
+            "author": author, "date": date[:10], "subject": subj,
+            "added": [], "removed": [], "touched": False,
+        }
+        index[h] = c
+        commits.append(c)
+
+    # added/removed por commit (diff escopado à discussão)
+    for c in commits:
+        diff = _git(
+            case_dir, "show", "--unified=0", "--format=", c["hash"],
+            "--", "morphology", "cycles",
+        )
+        if not diff:
+            continue
+        added, removed = [], []
+        for ln in diff.splitlines():
+            if ln[:1] not in "+-" or ln[:3] in ("+++", "---"):
+                continue
+            m = _ID_RE.search(ln)
+            if not m:
+                continue
+            (added if ln[0] == "+" else removed).append(m.group(1))
+        c["added"] = sorted(set(added) - set(removed))
+        c["removed"] = sorted(set(removed) - set(added))
+        c["touched"] = bool(c["added"] or c["removed"])
+
+    # atribuição de lanes (colunas) — estilo git graph
+    active = []  # active[col] = hash esperado (próximo a desenhar) ou None
+    for c in commits:
+        h, parents = c["hash"], c["parents"]
+        waiting = [i for i, x in enumerate(active) if x == h]
+        if waiting:
+            col = waiting[0]
+            for i in waiting[1:]:
+                active[i] = None
+        elif None in active:
+            col = active.index(None)
+        else:
+            col = len(active)
+            active.append(None)
+        c["col"] = col
+        if parents:
+            active[col] = parents[0]
+            for p in parents[1:]:
+                if p not in active:
+                    if None in active:
+                        active[active.index(None)] = p
+                    else:
+                        active.append(p)
+        else:
+            active[col] = None
+    for r, c in enumerate(commits):
+        c["row"] = r
+    maxcol = max((c["col"] for c in commits), default=0)
+    return {"commits": commits, "index": index, "maxcol": maxcol, "repo_url": _repo_url(case_dir)}
+
+
+def render_evolution(ev: dict) -> str:
+    if not ev or not ev["commits"]:
+        return "<p class='note'>Sem histórico de Git disponível para este caso.</p>"
+    commits, index, maxcol = ev["commits"], ev["index"], ev["maxcol"]
+    ROWH, GAP, PADX, R = 50, 22, 16, 5
+    gutter = PADX * 2 + maxcol * GAP
+    height = len(commits) * ROWH
+    lane_colors = ["#bf3a1d", "#234a63", "#5e6a2b", "#9a6a12", "#6d4a7a", "#3a6a6a"]
+
+    def cx(col): return PADX + col * GAP
+    def cy(row): return row * ROWH + ROWH // 2
+
+    edges = []
+    for c in commits:
+        for p in c["parents"]:
+            pc = index.get(p)
+            if not pc:
+                continue
+            x1, y1, x2, y2 = cx(c["col"]), cy(c["row"]), cx(pc["col"]), cy(pc["row"])
+            color = lane_colors[min(c["col"], pc["col"]) % len(lane_colors)]
+            if x1 == x2:
+                edges.append(f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{color}" fill="none" stroke-width="2"/>')
+            else:
+                ym = (y1 + y2) / 2
+                edges.append(
+                    f'<path d="M{x1} {y1} C{x1} {ym} {x2} {ym} {x2} {y2}" '
+                    f'stroke="{color}" fill="none" stroke-width="2"/>'
+                )
+    nodes = []
+    for c in commits:
+        color = lane_colors[c["col"] % len(lane_colors)]
+        rr = R + 1 if c["touched"] else R - 1
+        fill = color if c["touched"] else "var(--paper)"
+        nodes.append(
+            f'<circle cx="{cx(c["col"])}" cy="{cy(c["row"])}" r="{rr}" '
+            f'fill="{fill}" stroke="{color}" stroke-width="2"/>'
+        )
+    svg = (
+        f'<svg class="evo-svg" width="{gutter}" height="{height}" '
+        f'viewBox="0 0 {gutter} {height}" aria-hidden="true">{"".join(edges)}{"".join(nodes)}</svg>'
+    )
+
+    rows = []
+    for c in commits:
+        chips = ""
+        for x in c["added"]:
+            chips += f'<span class="chip add">+ {e(x)}</span>'
+        for x in c["removed"]:
+            chips += f'<span class="chip rem">− {e(x)}</span>'
+        subj = e(c["subject"])
+        if ev["repo_url"]:
+            subj = f'<a href="{ev["repo_url"]}/commit/{c["hash"]}">{subj}</a>'
+        rows.append(
+            f'<li class="{"evo-on" if c["touched"] else "evo-off"}" style="height:{ROWH}px">'
+            f'<div class="evo-subj">{subj}</div>'
+            f'<div class="evo-meta">{e(c["date"])} · {e(c["author"])} · <code>{e(c["short"])}</code></div>'
+            f'{f"<div class=evo-chips>{chips}</div>" if chips else ""}</li>'
+        )
+    return (
+        f'<div class="evo" style="--gutter:{gutter}px">{svg}'
+        f'<ol class="evo-list">{"".join(rows)}</ol></div>'
+    )
 
 
 def label_for(case: dict, opt_id: str) -> str:
@@ -365,6 +537,29 @@ CASE_TEMPLATE = r"""<!doctype html>
   table.qoc td.sc { text-align:center; font-family:var(--disp); font-weight:600; font-variant-numeric:tabular-nums; }
   table.qoc td.sc.na { color:var(--rule-2); font-weight:400; }
 
+  /* opção aposentada (superseded/rejected) — visível, riscada, fora da seleção */
+  .opt.retired { cursor:default; opacity:.6; border-style:dotted; border-color:var(--rule-2); background:transparent; }
+  .opt.retired:hover { transform:none; box-shadow:none; }
+  .opt.retired .ol { text-decoration:line-through; }
+  .opt.retired .op { color:var(--ochre); text-transform:none; letter-spacing:0; }
+
+  /* mapa de evolução (grafo do Git) */
+  .evo-wrap { overflow-x:auto; }
+  .evo { position:relative; min-width:520px; }
+  .evo-svg { position:absolute; left:0; top:0; }
+  .evo-list { list-style:none; margin:0; padding:0; }
+  .evo-list li { display:flex; flex-direction:column; justify-content:center; gap:2px;
+    padding:4px 10px 4px var(--gutter); border-bottom:1px solid var(--rule); }
+  .evo-list li.evo-off { opacity:.55; }
+  .evo-subj { font-family:var(--disp); font-weight:600; font-size:14px; line-height:1.15; }
+  .evo-subj a { color:var(--ink); text-decoration:none; }
+  .evo-subj a:hover { color:var(--blue); }
+  .evo-meta { font-family:var(--mono); font-size:10.5px; color:var(--ink-2); }
+  .evo-chips { margin-top:2px; display:flex; flex-wrap:wrap; gap:4px; }
+  .chip { font-family:var(--mono); font-size:10px; padding:1px 6px; border:1px solid var(--rule-2); }
+  .chip.add { color:var(--ok); border-color:var(--ok); }
+  .chip.rem { color:var(--signal); border-color:var(--signal); }
+
   footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule-2);
     font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; color:var(--ink-2); line-height:1.8; }
   footer code { color:var(--ink); }
@@ -434,6 +629,10 @@ CASE_TEMPLATE = r"""<!doctype html>
   <div class="sec"><span class="no"></span><h2>Discussão &amp; argumentação <span class="layer">IBIS · Dung</span></h2><span class="line"></span></div>
   <p class="lead">Argumentos pró/contra cada opção (camada IBIS). Setas de refutação formam um grafo; o motor calcula a <b>semântica grounded</b> (Dung) — quais argumentos sobrevivem ao debate. __IBIS_SUMMARY__</p>
   <div class="ibis">__IBIS__</div>
+
+  <div class="sec"><span class="no"></span><h2>Evolução &amp; genealogia <span class="layer">Git · bifurca/merge</span></h2><span class="line"></span></div>
+  <p class="lead">O mapa abaixo é o histórico da discussão a partir do Git: cada nó é um commit (data · autor · <i>porquê</i>), com <b>+ adicionado</b> / <b>− removido</b>. As linhas ramificam e se mesclam conforme forks e PRs entram. Nós cheios tocaram a discussão; vazios, não.</p>
+  <div class="evo-wrap">__EVOLUTION__</div>
 
   <div class="sec"><span class="no"></span><h2>Restrições registradas</h2><span class="line"></span></div>
   <ul class="cons">__CONS__</ul>
@@ -638,7 +837,7 @@ recompute();
 </body></html>"""
 
 
-def render_case_html(case: dict, cca: dict, generated: str) -> str:
+def render_case_html(case: dict, cca: dict, generated: str, case_dir: Path | None = None) -> str:
     # Linhas no padrão GMA: cada parâmetro é uma linha; opções são as células.
     rows = []
     for idx, p in enumerate(case["parameters"]):
@@ -647,11 +846,22 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
             prov = o.get("proposed_by", "?")
             model = o.get("model")
             prov_txt = f"{prov}" + (f" · {model}" if model else "")
-            cells.append(
-                f'<div class="opt" data-param="{e(p["id"])}" data-opt="{e(o["id"])}">'
-                f'<span class="ol">{e(o.get("label", o["id"]))}</span>'
-                f'<span class="op">{e(prov_txt)}</span></div>'
-            )
+            if o.get("status") in RETIRED:
+                # Aposentada: visível, riscada, com o motivo — mas fora da seleção.
+                reason = o.get("reason", "")
+                sup = o.get("superseded_by", "")
+                tail = (e(reason) + (f" → {e(sup)}" if sup else "")) or o.get("status", "")
+                cells.append(
+                    f'<div class="opt retired" title="{e(o.get("status",""))}">'
+                    f'<span class="ol">{e(o.get("label", o["id"]))}</span>'
+                    f'<span class="op">{e(o.get("status",""))} · {tail}</span></div>'
+                )
+            else:
+                cells.append(
+                    f'<div class="opt" data-param="{e(p["id"])}" data-opt="{e(o["id"])}">'
+                    f'<span class="ol">{e(o.get("label", o["id"]))}</span>'
+                    f'<span class="op">{e(prov_txt)}</span></div>'
+                )
         desc = p.get("description", "")
         rows.append(
             f'<div class="row" style="--i:{idx}">'
@@ -764,7 +974,7 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
         head = "".join(f"<th>{e(c.get('label', c['id']))}</th>" for c in qual_crit)
         for p in case["parameters"]:
             rows_q = []
-            for o in p["options"]:
+            for o in active_options(p):
                 sc = o.get("scores", {}) or {}
                 cells = "".join(
                     (f"<td class='sc'>{sc[c['id']]}</td>" if c["id"] in sc else "<td class='sc na'>·</td>")
@@ -777,6 +987,10 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
                 f'<tbody>{"".join(rows_q)}</tbody></table></div>'
             )
         qoc_html = "".join(tables)
+
+    # --- Mapa de evolução (grafo do Git: bifurcações e merges) ---
+    evolution_html = render_evolution(git_evolution(case_dir)) if case_dir else \
+        "<p class='note'>Mapa indisponível (sem diretório do caso).</p>"
 
     # Dados embutidos para a interatividade (sem depender de fetch; roda em file://).
     data = {
@@ -794,7 +1008,7 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
                         "estimates": o.get("estimates", {}) or {},
                         "scores": o.get("scores", {}) or {},
                     }
-                    for o in p["options"]
+                    for o in active_options(p)
                 ],
             }
             for p in case["parameters"]
@@ -837,6 +1051,7 @@ def render_case_html(case: dict, cca: dict, generated: str) -> str:
         .replace("__IBIS_SUMMARY__", ibis_summary)
         .replace("__IBIS__", ibis_html or "<p class='note'>Sem argumentos ainda — proponha um pró/contra.</p>")
         .replace("__QOCMATRIX__", qoc_html or "<p class='note'>Sem critérios qualitativos ainda.</p>")
+        .replace("__EVOLUTION__", evolution_html)
         .replace("__DATA_JSON__", data_json)
     )
 
@@ -912,7 +1127,7 @@ def main() -> int:
         out_dir = SITE_DIR if single else SITE_DIR / case["id"]
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(
-            render_case_html(case, cca, generated), encoding="utf-8"
+            render_case_html(case, cca, generated, case_dir), encoding="utf-8"
         )
         (out_dir / "data.json").write_text(
             json.dumps({"case": case, "cca": cca}, ensure_ascii=False, indent=2),

@@ -26,5 +26,7 @@ parameter:
       label: "Convenção própria"
       proposed_by: "agent:discovery"
       model: "claude-opus-4-8"
-      status: proposed
+      status: superseded
+      reason: "Não interoperável; preferir o padrão emergente AGENTS.md."
+      superseded_by: opt.protocolo.agentsmd
       rationale: "Flexível; não interoperável."

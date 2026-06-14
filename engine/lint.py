@@ -154,6 +154,8 @@ def lint_case(case_dir: Path, rep: Report) -> None:
                     rep.warn(rel(f), f"{oid}: status ausente (use {sorted(STATUS)})")
                 elif st not in STATUS:
                     rep.err(rel(f), f"{oid}: status inválido '{st}'")
+                elif st in {"superseded", "rejected"} and not o.get("reason"):
+                    rep.warn(rel(f), f"{oid}: aposentada ({st}) sem 'reason' (explique o porquê)")
                 sc = o.get("scores") or {}
                 if not isinstance(sc, dict):
                     rep.err(rel(f), f"{oid}: scores deve ser um mapa")

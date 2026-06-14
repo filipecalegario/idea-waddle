@@ -16,7 +16,7 @@ Leia o contexto completo no [`README.md`](README.md) e a fundamentação em [`do
 2. **Rastreabilidade.** Toda contribuição registra sua proveniência: quem (humano `@usuario` ou agente `agent:nome`), e — para agentes — **qual modelo e versão**. O Git é a fonte de verdade da autoria.
 3. **Human-in-the-loop.** Agentes **propõem**; humanos **ratificam**. Nenhum PR é mesclado automaticamente sem aprovação humana. (Lição dos incidentes de "AI maintainer" — ver [`01-prior-art.md`](docs/discovery/01-prior-art.md).)
 4. **Divergir, depois convergir.** Primeiro abrimos o máximo de possibilidades; depois consolidamos em caminhos de decisão (ritmo Double Diamond).
-5. **As ideias não se apagam, evoluem.** Preferimos *supersedência* (uma nova versão substitui a antiga, com histórico preservado) a deleção silenciosa.
+5. **As ideias não se apagam, evoluem.** Em vez de deletar uma opção, marque `status: superseded` (ou `rejected`) com `reason:` (e opcional `superseded_by:`). Ela continua **visível e riscada** no site, com o motivo, mas **sai do cálculo** da caixa. A evolução completa (o que entrou/saiu, por quê, quando) é mostrada no **mapa de evolução** gerado do histórico do Git (bifurcações e merges).
 
 ## 3. Como contribuir
 

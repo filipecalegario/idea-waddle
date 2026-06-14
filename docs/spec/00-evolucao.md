@@ -111,6 +111,11 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **QOC profunda:** `weight` nos critérios; site renderiza a **Matriz QOC** (opções × critérios) e um **Índice QOC ponderado** por configuração no painel de estimativas.
 - **Motor/lint:** `cca.py` carrega `arguments.yaml`, computa grounded, renderiza as seções; `lint.py` valida argumentos (id único, stance pro/con, target/claim/by, ataques referenciam ids existentes, rastreabilidade). Dados de demo + pesos adicionados ao caso `idea-waddle-platform`. AGENTS.md documenta as quatro camadas. O caso CIn herda a capacidade via CI.
 
+### 2026-06-14 — Visibilidade da evolução: mapa (Git) + ciclo de vida
+- **Mapa de evolução:** o motor lê o histórico do Git (`git log`/`show`) e renderiza um **grafo com lanes** (bifurcações/merges) — cada nó é um commit (data · autor · porquê · chips de `+adicionado`/`−removido` de opções/argumentos), linkado ao commit no GitHub. Seção "Evolução & genealogia". Requer `fetch-depth: 0` na CI (ajustado nos dois repos).
+- **Ciclo de vida (sem apagar):** opções com `status: superseded|rejected` + `reason` aparecem **riscadas com o motivo** e **saem do cálculo** (ex.: `opt.protocolo.custom` aposentada → total do caso da plataforma caiu de 327.680 p/ 245.760). lint avisa se aposentar sem `reason`.
+- Mostra os três eixos pedidos: o que entrou/saiu (chips + status), por quê (mensagem/`reason`/`claim`), e a evolução no tempo (grafo). Bifurcações/merges aparecem conforme PRs reais são mesclados.
+
 ## Estado atual (snapshot)
 - **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
