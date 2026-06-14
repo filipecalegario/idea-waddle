@@ -4,7 +4,10 @@
 
 Pessoas e agentes propõem ideias por *fork* e *pull request*; agentes leem, conciliam e consolidam essas contribuições em artefatos vivos — uma **caixa morfológica** de opções e restrições, uma linha do tempo da evolução das ideias e um **site vivo** que se atualiza a cada contribuição. Tudo rastreável: quem (ou qual modelo) disse o quê, e quando.
 
-> **Estado atual:** Discovery. A pesquisa de fundamentação e os artefatos de decisão estão em [`docs/discovery/`](docs/discovery/). Comece pelo [índice](docs/discovery/00-indice.md).
+**Site vivo (caso auto-referente):** https://filipecalegario.github.io/idea-waddle/
+**Primeiro caso concreto — chamada do cluster CIn-UFPE:** https://github.com/filipecalegario/cin-cluster-inferencia · [site](https://filipecalegario.github.io/cin-cluster-inferencia/)
+
+> A pesquisa de fundamentação e os artefatos de decisão estão em [`docs/discovery/`](docs/discovery/); a evolução do projeto em [`docs/spec/00-evolucao.md`](docs/spec/00-evolucao.md).
 
 ---
 

@@ -97,8 +97,16 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **O que foi feito:** removido `cases/cin-ufpe-inference-cluster/` da idea-waddle; criado [`cases/idea-waddle-platform/`](../../cases/idea-waddle-platform/) — a caixa morfológica do **design da própria plataforma** (9 params, 4 restrições, critérios alcance/soberania/simplicidade), semeada a partir de `docs/discovery/03`. *Inception*: a plataforma demonstra o método com o próprio caso dela.
 - **Resultado:** idea-waddle constrói `idea-waddle-platform` (9 params · 327.680 configs · 288.000 viáveis · 2 restrições hard). README/AGENTS atualizados: CIn aponta para o repo próprio; caso bundled é o auto-referente. Separação plataforma × caso **concluída**.
 
+### 2026-06-14 — Passo 5: Pages no ar + chamada pública preparada
+- **Privacidade:** `INTENT.md` (texto de origem do idealizador) removido do Git **inclusive do histórico** (`git filter-branch` + force-push); cópia local preservada (gitignored + backup fora do repo). Ref no spec corrigida.
+- **idea-waddle tornada pública** (via API). **GitHub Pages habilitado** (source = Actions) nos dois repos; builds verdes (a CI do caso agora busca a plataforma pública). Sites no ar:
+  - Plataforma: https://filipecalegario.github.io/idea-waddle/
+  - Caso CIn (chamada viva): https://filipecalegario.github.io/cin-cluster-inferencia/
+- **Kit de divulgação** no repo do caso: `.github/` com CODEOWNERS, pull_request_template e ISSUE_TEMPLATE (opção, restrição, parâmetro/critério, segunda opinião) + `ANNOUNCE.md` (textos curto/médio/e-mail + good first issues). O ato de divulgar (redes/e-mail) fica com o usuário.
+- **Pendente do usuário:** branch protection das `main` (require PR + Code Owners + check `lint`); divulgar de fato.
+
 ## Estado atual (snapshot)
-- **Fase:** protótipo em evolução. Plataforma e caso CIn agora em **repositórios separados**.
+- **Fase:** chamada pública pronta para receber contribuições. Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
 - **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
 - **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
@@ -118,7 +126,9 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 2. ✅ ~~Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.~~ (feito 2026-06-14)
 3. ✅ ~~Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).~~ (feito 2026-06-14, SIMULADO — substituir por família real)
 4. ✅ ~~Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.~~ (feito 2026-06-14)
-5. Habilitar o GitHub Pages e divulgar a chamada pública.
+5. ✅ ~~Habilitar o GitHub Pages e divulgar a chamada pública.~~ (Pages no ar + kit de divulgação prontos em 2026-06-14; divulgação efetiva a cargo do usuário)
+
+**Todos os 5 passos candidatos concluídos.** Próximas frentes naturais: camadas IBIS/QOC/Dung; refinar premissas/estimativas com dados reais; 2ª opinião por família de modelo real; empacotar o motor (PyPI).
 
 ---
 
