@@ -394,7 +394,7 @@ CASE_TEMPLATE = r"""<!doctype html>
   .topbar { position:fixed; top:0; left:0; right:0; height:5px; background:var(--signal); z-index:30; }
   .wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:40px 28px 84px; counter-reset:sec; }
   a { color:var(--blue); text-underline-offset:3px; }
-  code { font-family:var(--mono); font-size:.86em; background:var(--paper-2); padding:1px 5px; }
+  code { font-family:var(--mono); font-size:.86em; background:var(--paper-2); padding:1px 5px; overflow-wrap:anywhere; }
 
   /* cabeçalho (masthead) */
   .masthead { animation:rise .6s both; }
@@ -429,10 +429,10 @@ CASE_TEMPLATE = r"""<!doctype html>
 
   .est-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:1px;
     background:var(--rule); border:1px solid var(--rule); }
-  .est { background:var(--panel); padding:11px 14px; }
+  .est { background:var(--panel); padding:11px 14px; overflow:hidden; }
   .est .k { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); }
   .est .v { font-family:var(--disp); font-weight:600; font-size:23px; line-height:1.1; margin-top:4px;
-    font-variant-numeric:tabular-nums; animation:tick .4s ease; }
+    font-variant-numeric:tabular-nums; animation:tick .4s ease; overflow-wrap:anywhere; }
   .est .v .u { font-family:var(--mono); font-weight:400; font-size:12px; color:var(--ink-2); }
   .est .miss { font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:7px; }
   .gauge { display:flex; gap:3px; margin-top:9px; }
@@ -441,10 +441,11 @@ CASE_TEMPLATE = r"""<!doctype html>
   .est .qv { font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:5px; }
 
   /* títulos de seção numerados */
-  .sec { display:flex; align-items:baseline; gap:12px; margin:38px 0 10px; counter-increment:sec; }
+  .sec { display:flex; align-items:baseline; gap:12px; margin:38px 0 10px; counter-increment:sec; flex-wrap:wrap; }
   .sec .no { font-family:var(--mono); font-size:12px; color:var(--signal); letter-spacing:.06em; }
   .sec .no::before { content:"§" counter(sec,decimal-leading-zero); }
-  .sec h2 { font-family:var(--disp); font-weight:600; font-size:22px; margin:0; letter-spacing:-.01em; }
+  .sec h2 { font-family:var(--disp); font-weight:600; font-size:22px; margin:0; letter-spacing:-.01em;
+    min-width:0; overflow-wrap:anywhere; }
   .sec .line { flex:1; border-top:1px solid var(--rule); align-self:center; }
   .lead { color:var(--ink-2); font-size:14px; margin:0 0 16px; max-width:78ch; }
 
