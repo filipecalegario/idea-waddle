@@ -75,11 +75,17 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Pedido do usuário:** sair do visual genérico de IA (dark-card/azul). Usada a skill **frontend-design**.
 - **Direção estética:** *dossiê técnico / editorial científico* — fundo papel com grid milimetrado + grão sutil; tipografia com caráter (**Fraunces** display, **Archivo** corpo, **IBM Plex Mono** dados); réguas finas e sombras sólidas deslocadas; seções numeradas (§), marcas de registro nos cantos do instrumento; caixa morfológica como folha de especificação; estimativas como "leitura de instrumento" com medidores segmentados; células selecionáveis com estados estampados/hachurados; reveals escalonados no load (respeita prefers-reduced-motion). Tudo continua gerado por `engine/cca.py`.
 
+### 2026-06-14 — Passo 4: lint de PR + loop "agente propõe → humano ratifica"
+- **Lint:** [`engine/lint.py`](../../engine/lint.py) valida o padrão de contribuição (ids únicos/referências; CCA liga parâmetros diferentes; degree/type/status/kind válidos; **rastreabilidade** — agente sem `model` é erro; scores 1–5; front-matter de ciclos). Testado: passa no repo (0 erros) e pega 7/7 erros numa fixture quebrada.
+- **CI:** novo job `lint` em [`build-site.yml`](../../.github/workflows/build-site.yml); `build` e `deploy` dependem dele — PR inválido falha e não é publicado.
+- **Ratificação humana:** [`.github/CODEOWNERS`](../../.github/CODEOWNERS) (dono revisa) + [`pull_request_template.md`](../../.github/pull_request_template.md) com o protocolo. Nenhum PR é auto-mesclado.
+- **Pendência operacional:** habilitar no GitHub a branch protection (require PR + review de Code Owners + status check `lint`).
+
 ## Estado atual (snapshot)
-- **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
+- **Fase:** protótipo em evolução. Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
-- **Camada ativa:** caixa morfológica (11 params) + CCA + **camada QOC (critérios + estimativas)** no site vivo interativo. Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
-- **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) para o site ir ao ar.
+- **Camada ativa:** caixa morfológica (11 params) + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
+- **Pendência operacional:** habilitar GitHub Pages (Settings → Pages → Source: GitHub Actions) **e** a branch protection da `main` (ver CODEOWNERS).
 
 ## Decisões em aberto
 (ver detalhes em [`/docs/discovery/04-perguntas-provocacoes.md`](../discovery/04-perguntas-provocacoes.md))
@@ -94,7 +100,7 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 1. ✅ ~~Acoplar a **camada de critérios (QOC) + estimativas** de custo/energia por configuração.~~ (feito 2026-06-14)
 2. ✅ ~~Adicionar parâmetros faltantes ao Caso 0: **refrigeração/energia**, **armazenamento**, **financiamento**, **modelos de LLM a servir**, **políticas de uso/cota**.~~ (feito 2026-06-14)
 3. ✅ ~~Buscar **segunda opinião de outra família de modelos** sobre a caixa semeada (princípio de diversidade).~~ (feito 2026-06-14, SIMULADO — substituir por família real)
-4. Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.
+4. ✅ ~~Implementar **lint de PR** (validação do padrão de escrita) e o loop *agente propõe → humano ratifica*.~~ (feito 2026-06-14)
 5. Habilitar o GitHub Pages e divulgar a chamada pública.
 
 ---

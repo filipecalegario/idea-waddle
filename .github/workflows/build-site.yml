@@ -20,7 +20,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    # "Agente propõe, humano dispõe": todo PR é validado contra o padrão de
+    # escrita (AGENTS.md). PR inválido falha aqui e não é construído/publicado.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependências
+        run: pip install -r engine/requirements.txt
+      - name: Validar padrão de contribuição (lint)
+        run: python engine/lint.py
+
   build:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

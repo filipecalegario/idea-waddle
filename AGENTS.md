@@ -64,7 +64,13 @@ Adquirir GPUs do mercado chinês (ex.: Huawei Ascend 910B).
 
 Esquemas detalhados de parâmetros, opções, restrições e argumentos estão exemplificados em [`02-fundamentos-teoricos.md`](docs/discovery/02-fundamentos-teoricos.md) (§A.4 e §B).
 
-> Quando o repositório amadurecer, o CI poderá validar (lint) o formato dos PRs automaticamente.
+**Validação automática (lint).** O padrão acima é verificado por [`engine/lint.py`](engine/lint.py), que roda na CI a cada PR (job `lint` em [`.github/workflows/build-site.yml`](.github/workflows/build-site.yml)). Rode localmente antes de abrir o PR:
+
+```bash
+python engine/lint.py
+```
+
+O linter valida: ids únicos e referências existentes; restrições ligando opções de parâmetros **diferentes** (regra do CCA); `degree`/`type`/`status`/`kind` válidos; **rastreabilidade** (toda opção/restrição/ciclo de um agente precisa declarar `model`); scores em 1–5; front-matter dos ciclos. Erros (✗) bloqueiam o merge; avisos (⚠) não.
 
 ## 5. Como os agentes devem processar o conteúdo
 
