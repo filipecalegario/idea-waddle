@@ -29,6 +29,30 @@ constraints:
     model: "claude-opus-4-8"
     note: "Huawei Ascend não é fornecido pelo mercado americano."
 
+  - a: opt.aceleracao.h100
+    b: opt.fornecimento.cn
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "NVIDIA H100/H200 (mercado americano) indisponível pela via do mercado chinês."
+
+  - a: opt.aceleracao.l40s
+    b: opt.fornecimento.cn
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "NVIDIA L40S/RTX (mercado americano) indisponível pela via do mercado chinês."
+
+  - a: opt.aceleracao.mi300
+    b: opt.fornecimento.cn
+    type: empirical
+    degree: incompatible
+    by: "agent:discovery"
+    model: "claude-opus-4-8"
+    note: "AMD MI300X (mercado americano) indisponível pela via do mercado chinês."
+
   - a: opt.rede.infiniband
     b: opt.aceleracao.ascend
     type: empirical

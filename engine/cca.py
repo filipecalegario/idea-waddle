@@ -191,7 +191,9 @@ CASE_TEMPLATE = r"""<!doctype html>
   .badge.weak { background:rgba(224,175,104,.18); color:var(--weak); }
   .space { margin-top:10px; font-size:13px; }
   .space b { color:var(--ok); }
-  .estpanel { margin-top:14px; }
+  .estpanel { margin:0 0 22px; position:sticky; top:0; z-index:5;
+              box-shadow:0 6px 16px rgba(0,0,0,.35); }
+  .estnote { color:var(--mut); font-size:12px; font-weight:400; }
   .est-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
   .est { background:#12151d; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
   .est .k { color:var(--mut); font-size:12px; }
@@ -226,6 +228,13 @@ CASE_TEMPLATE = r"""<!doctype html>
     <div class="stat"><b>__QUOTIENT__</b><span>espaço de solução</span></div>
   </div>
 
+  <div class="panel estpanel">
+    <h3>Estimativas da configuração (QOC) <span class="estnote">— atualiza conforme você seleciona abaixo</span></h3>
+    <div id="estimates"><div class="empty">Selecione opções na caixa abaixo para estimar custo, potência e energia.</div></div>
+    <div class="hint" style="margin:10px 0 0">Números são <b>placeholders a refinar</b> (premissas em
+      <code>assumptions.yaml</code>; valores por opção em <code>params/*.yaml</code>). Tratar como ordem de grandeza.</div>
+  </div>
+
   <h2>Explorar a caixa morfológica</h2>
   <div class="hint">Clique numa célula por linha para montar uma configuração. As opções
     <b style="color:var(--hard)">incompatíveis</b> com a sua seleção ficam bloqueadas; as
@@ -242,13 +251,6 @@ CASE_TEMPLATE = r"""<!doctype html>
       <h3>Caminhos de restrição ativos</h3>
       <div id="restrictions"><div class="empty">Selecione células para ver as restrições disparadas.</div></div>
     </div>
-  </div>
-
-  <div class="panel estpanel">
-    <h3>Estimativas da configuração (QOC)</h3>
-    <div class="hint" style="margin:0 0 10px">Números são <b>placeholders a refinar</b> (premissas editáveis em
-      <code>assumptions.yaml</code>; valores por opção em <code>params/*.yaml</code>). Tratar como ordem de grandeza.</div>
-    <div id="estimates"><div class="empty">Selecione opções para estimar custo, potência e energia.</div></div>
   </div>
 
   <h2>Critérios de avaliação (QOC)</h2>

@@ -62,6 +62,10 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **O que foi feito:** adicionados 5 parâmetros à caixa do CIn — [`07-refrigeracao`](../../cases/cin-ufpe-inference-cluster/morphology/params/07-refrigeracao.yaml), [`08-armazenamento`](../../cases/cin-ufpe-inference-cluster/morphology/params/08-armazenamento.yaml), [`09-financiamento`](../../cases/cin-ufpe-inference-cluster/morphology/params/09-financiamento.yaml), [`10-modelos-llm`](../../cases/cin-ufpe-inference-cluster/morphology/params/10-modelos-llm.yaml), [`11-politicas-uso`](../../cases/cin-ufpe-inference-cluster/morphology/params/11-politicas-uso.yaml) — com estimates/scores placeholder e 3 novas restrições (refrigeração × escala/hardware).
 - **Resultado:** **11 parâmetros · 419.904 configurações totais · 253.692 viáveis (60,4%)**. Refrigeração e armazenamento entram no capex; "Portfólio diverso" de modelos conecta ao princípio de diversidade.
 
+### 2026-06-14 — Ajustes de UX e correção de restrições (feedback do usuário)
+- **Quadro de estimativas movido para o topo** (logo após os indicadores, antes da caixa) e fixado (sticky): atualiza ao vivo conforme a seleção muda na caixa abaixo. Motivo: visibilidade imediata para quem usa.
+- **Correção de consistência mercado × placas:** adicionadas restrições recíprocas — selecionar **mercado chinês** agora bloqueia H100/L40S/MI300 (sobra Ascend); **mercado americano** bloqueia Ascend. Espaço viável: 178.848 (42,6%) com 9 restrições.
+
 ## Estado atual (snapshot)
 - **Fase:** protótipo em evolução (seguindo os próximos passos candidatos em ordem). Ciclo **001 (abertura)** aberto, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.
