@@ -11,8 +11,8 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 
 ## Linha do tempo
 
-### 2026-06-14 — Gênese (INTENT.md)
-- Origem: transcrição de áudio do idealizador (Filipe) em [`/INTENT.md`](../../INTENT.md).
+### 2026-06-14 — Gênese
+- Origem: transcrição de áudio do idealizador (Filipe), mantida em um **arquivo de origem privado**, fora do repositório público (não versionado, por privacidade).
 - Necessidade central: uma chamada pública para especificar, de forma colaborativa (humanos + agentes), um cluster de **inferência** para o CIn-UFPE (complementando o cluster *batch* "Apuana"), chegando a **caminhos de decisão** com estimativas de custo/energia/aquisição de GPUs (mercado americano vs. chinês) para a diretoria do CIn.
 - Pedidos explícitos: usar Git como espinha dorsal; `AGENTS.md` com contexto + protocolo; **caixa morfológica** com restrições; **site vivo** atualizado a cada contribuição; rastreabilidade; linha do tempo por ciclos (`001-`, `002-`); pesquisar prior art e fundamentos teóricos; ser provocado com perguntas.
 

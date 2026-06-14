@@ -1,6 +1,9 @@
 # Site gerado pelo motor (publicado pela CI; não precisa versionar)
 /site/
 
+# Documento de origem privado (não versionar / não publicar)
+INTENT.md
+
 # Python
 __pycache__/
 *.pyc
