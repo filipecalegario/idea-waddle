@@ -86,6 +86,12 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **O que foi feito:** `engine/cca.py` e `engine/lint.py` agora aceitam `IW_CASES` (origem dos casos) e `IW_SITE` (saída do site) por variável de ambiente; sem elas, o comportamento padrão (`cases/`, `site/`) é idêntico. `lint.rel()` ficou robusto a caminhos fora do repo.
 - **Validação:** padrão inalterado; com `IW_CASES`/`IW_SITE` apontando p/ um diretório externo, motor e lint operam sobre o caso externo e geram o site lá, sem tocar no repo local. Abre caminho para o repo do caso CIn consumir o motor via checkout na CI (item 3).
 
+### 2026-06-14 — Separação plataforma × caso, itens 2–3: caso CIn migrado para repo próprio
+- **Item 2 (transferência com histórico):** `git subtree split --prefix=cases/cin-ufpe-inference-cluster` → branch `cin-split` (prefixo removido, 5 commits do caso preservados) → transferido para o novo repo `github.com/filipecalegario/cin-cluster-inferencia` (layout: `morphology/` e `cycles/` na raiz).
+- **Item 3 (repo do caso autônomo):** lá foram criados README/AGENTS (fino, aponta p/ o protocolo canônico)/CALL + `.github/workflows/build-site.yml` que faz **checkout da idea-waddle** e roda o motor via `IW_CASE`, publicando o próprio Pages.
+- **Suporte no motor:** `cca.py`/`lint.py` aceitam `IW_CASE` (um único diretório de caso, `morphology/` na raiz) e `IW_CASE_ID`; `load_case` resolve o id do nome do diretório. Validado contra o repo novo (id `cin-cluster-inferencia`, mesmos números).
+- **Pendente (item 4):** a idea-waddle ainda contém `cases/cin-ufpe-inference-cluster/` (para não quebrar seu build). Decidir: removê-lo e converter `docs/discovery/03` no caso auto-referente da própria plataforma, ou mantê-lo como exemplo/demo.
+
 ## Estado atual (snapshot)
 - **Fase:** protótipo em evolução. Ciclos **001 (abertura)** e **002 (segunda opinião)** abertos, em modo *divergir*.
 - **Repositório:** `github.com/filipecalegario/idea-waddle`, branch `main`.

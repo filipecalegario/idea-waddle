@@ -12,7 +12,9 @@ Uso:
     python engine/lint.py            # valida todos os casos
     echo $?                          # 0 = ok, 1 = há erros
 
-Variável de ambiente (opcional): IW_CASES = diretório de casos (default: cases/).
+Variáveis de ambiente (opcionais):
+    IW_CASES  diretório de casos (default: cases/)
+    IW_CASE   um único diretório de caso (morphology/ na raiz); ignora IW_CASES
 
 Saída: avisos (⚠, não bloqueiam) e erros (✗, bloqueiam / exit 1).
 """
@@ -213,11 +215,13 @@ def lint_case(case_dir: Path, rep: Report) -> None:
 
 def main() -> int:
     rep = Report()
-    cases = (
-        [d for d in sorted(CASES.iterdir()) if (d / "morphology").is_dir()]
-        if CASES.exists()
-        else []
-    )
+    single = os.environ.get("IW_CASE")
+    if single:
+        cases = [Path(single)]
+    elif CASES.exists():
+        cases = [d for d in sorted(CASES.iterdir()) if (d / "morphology").is_dir()]
+    else:
+        cases = []
     if not cases:
         print("Nenhum caso com morphology/ encontrado.")
         return 1

@@ -15,8 +15,10 @@ Uso:
     # abra site/index.html
 
 Variáveis de ambiente (opcionais, p/ consumir casos de um repo externo):
-    IW_CASES  diretório com os casos (default: <repo>/cases)
-    IW_SITE   diretório de saída do site (default: <repo>/site)
+    IW_CASES    diretório com os casos (default: <repo>/cases)
+    IW_SITE     diretório de saída do site (default: <repo>/site)
+    IW_CASE     um único diretório de caso (morphology/ na raiz); ignora IW_CASES
+    IW_CASE_ID  id/nome do caso (default: nome do diretório)
 """
 from __future__ import annotations
 
@@ -72,7 +74,7 @@ def load_case(case_dir: Path) -> dict:
         assumptions = adata.get("assumptions", {}) or {}
 
     return {
-        "id": case_dir.name,
+        "id": case_dir.resolve().name,
         "parameters": params,
         "constraints": constraints,
         "criteria": criteria,
@@ -719,19 +721,29 @@ def main() -> int:
     SITE_DIR.mkdir(exist_ok=True)
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-    cases = []
-    if CASES_DIR.exists():
-        for case_dir in sorted(CASES_DIR.iterdir()):
-            if (case_dir / "morphology" / "params").is_dir():
-                cases.append(case_dir)
+    # IW_CASE: um único diretório de caso (morphology/ na raiz dele) — usado por
+    # um repositório de caso externo. Sem ele, varre CASES_DIR (multi-caso).
+    single = os.environ.get("IW_CASE")
+    if single:
+        cases = [Path(single)]
+    elif CASES_DIR.exists():
+        cases = [
+            d for d in sorted(CASES_DIR.iterdir())
+            if (d / "morphology" / "params").is_dir()
+        ]
+    else:
+        cases = []
 
     if not cases:
         print("Nenhum caso com morphology/params encontrado.")
         return 1
 
+    case_id_override = os.environ.get("IW_CASE_ID")
     loaded = []
     for case_dir in cases:
         case = load_case(case_dir)
+        if single and case_id_override:
+            case["id"] = case_id_override
         cca = compute_cca(case)
         loaded.append(case)
 
