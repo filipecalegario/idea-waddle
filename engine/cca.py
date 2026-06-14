@@ -907,7 +907,9 @@ def main() -> int:
         cca = compute_cca(case)
         loaded.append(case)
 
-        out_dir = SITE_DIR / case["id"]
+        # Caso único (repo de caso externo): página na RAIZ do site, sem landing.
+        # Multi-caso: cada caso num subdiretório + um índice-landing na raiz.
+        out_dir = SITE_DIR if single else SITE_DIR / case["id"]
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(
             render_case_html(case, cca, generated), encoding="utf-8"
@@ -924,7 +926,8 @@ def main() -> int:
             f"{cca['n_hard_constraints']} restrições"
         )
 
-    (SITE_DIR / "index.html").write_text(render_index(loaded), encoding="utf-8")
+    if not single:
+        (SITE_DIR / "index.html").write_text(render_index(loaded), encoding="utf-8")
     print(f"Site gerado em {SITE_DIR}/index.html")
     return 0
 
