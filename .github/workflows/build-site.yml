@@ -33,6 +33,8 @@ jobs:
         run: pip install -r engine/requirements.txt
       - name: Validar padrão de contribuição (lint)
         run: python engine/lint.py
+      - name: Checar protocolo embutido no AGENTS.md (drift)
+        run: python engine/sync_protocol.py --check AGENTS.md
 
   build:
     needs: lint

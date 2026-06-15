@@ -126,8 +126,11 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Decisão (pendente de implementação):** protocolo como **arquivo commitado em cada repo, sem skill** (universal p/ Codex/Gemini/humano; autossuficiente no clone). Fonte única `idea-waddle/PROTOCOL.md` → **embutida** no `AGENTS.md` de cada repo entre marcadores; `engine/sync_protocol.py` (com `--check`) materializa e a CI do caso detecta *drift* (usa o checkout `_engine` já existente). Descartado: só-skill, MCP (não autossuficientes/cross-agent).
 - **Entrevista de complexidade (respostas do usuário):** incômodos = arquitetura (2 repos/motor/CI) + excesso de camadas no site; essenciais agora = **Caixa+CCA** e **IBIS+Dung** (QOC/estimativas e mapa/ciclo de vida seriam candidatos a ocultar/cortar); alvo = **plataforma genérica**; público inicial = humanos técnicos + agentes (YAML/PR ok). Tensão a resolver: quer genericidade mas se incomoda com 2 repos → avaliar **um repo só** (motor + protocolo + caso(s)), o que também elimina o bug do protocolo por construção. Tudo **pendente**, sem alteração de código.
 
+### 2026-06-14 — Protocolo autossuficiente implementado (separar capacidade × contexto)
+- `PROTOCOL.md` (idea-waddle) = fonte única do protocolo, **agnóstico de caso** (a *capacidade* "como colaborar"). `engine/sync_protocol.py` embute esse conteúdo no `AGENTS.md` de cada repo entre marcadores `BEGIN/END PROTOCOLO`; `--check` detecta drift na CI (idea-waddle e CIn). O `AGENTS.md` de cada repo passa a ser **autossuficiente** (contexto do caso + protocolo completo) — agente/humano que clona só o repo do caso tem tudo localmente, sem URL remota. Resolve o bug do teste com Codex.
+
 ## Estado atual (snapshot)
-- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** + motor agnóstico de domínio (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado. **Em discussão: simplificação (ver entrada acima).**
+- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** + motor agnóstico de domínio (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado e **AGENTS.md autossuficiente** (protocolo embutido). **Em discussão: simplificação de camadas/arquitetura.**
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
 - **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
 - **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
@@ -135,7 +138,7 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 
 ## Decisões em aberto
 (ver detalhes em [`/docs/discovery/04-perguntas-provocacoes.md`](../discovery/04-perguntas-provocacoes.md))
-- **[A IMPLEMENTAR] Protocolo autossuficiente por repo:** `PROTOCOL.md` (fonte em idea-waddle) embutido no `AGENTS.md` de cada repo via `sync_protocol.py` + checagem de drift na CI. Sem skill/MCP. (Conserta o bug do clone-só-do-caso.)
+- **[✅ FEITO 2026-06-14] Protocolo autossuficiente por repo:** `PROTOCOL.md` (fonte única em idea-waddle) embutido no `AGENTS.md` de cada repo via `engine/sync_protocol.py` + checagem de drift na CI (`--check`). Sem skill/MCP. Conserta o bug do clone-só-do-caso (teste Codex).
 - **[EM ABERTO] Simplificação:** reduzir camadas no site (manter Caixa+CCA e IBIS+Dung; ocultar/cortar QOC-estimativas e mapa/ciclo de vida?) e repensar arquitetura — possivelmente **um repo só** (motor + protocolo + casos).
 - **Substrato:** GitHub (preferência atual) vs. GitLab self-hosted (soberania de dados p/ UFPE).
 - **Política de diversidade operacional:** quorum de modelos? cotas humano:agente por ciclo? como medir diversidade?

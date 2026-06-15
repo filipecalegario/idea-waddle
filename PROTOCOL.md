@@ -1,23 +1,3 @@
-# AGENTS.md — idea-waddle (plataforma)
-
-> Este arquivo é autossuficiente: dá o contexto deste repositório **e** embute o protocolo de colaboração canônico (abaixo). Qualquer agente ou humano que clonar tem tudo localmente.
-
-## Este repositório
-**idea-waddle** é a plataforma de colaboração criativa humano + agente sobre Git (motor + protocolo). Contém:
-- `engine/` — o motor (`cca.py` gera o site vivo; `lint.py` valida; `sync_protocol.py` embute o protocolo).
-- [`PROTOCOL.md`](PROTOCOL.md) — o **protocolo canônico** (fonte única, agnóstico de caso). É ele que aparece embutido na seção "Protocolo" abaixo e nos `AGENTS.md` dos repos de caso.
-- `cases/idea-waddle-platform/` — caso **auto-referente** (a plataforma analisando o próprio design).
-- `docs/discovery/` (fundamentação) e `docs/spec/00-evolucao.md` (registro vivo da evolução — manter atualizado a cada marco).
-
-Casos **concretos** vivem em repositórios próprios que consomem este motor via CI (variáveis `IW_CASE`/`IW_SITE`). Ex.: cluster de inferência do CIn-UFPE → https://github.com/filipecalegario/cin-cluster-inferencia
-
-## Para trabalhar no motor (código)
-`engine/` é Python puro (só PyYAML). Rode `python engine/lint.py` e `python engine/cca.py` antes de PRs. Ao editar o protocolo, edite **`PROTOCOL.md`** e rode `python engine/sync_protocol.py AGENTS.md` (e re-sincronize os repos de caso). A CI verifica drift com `--check`.
-
----
-
-<!-- BEGIN PROTOCOLO (sincronizado de idea-waddle/PROTOCOL.md — não editar à mão; rode engine/sync_protocol.py) -->
-
 # Protocolo de colaboração idea-waddle
 
 > Protocolo **canônico e agnóstico de caso** para colaboração criativa entre humanos e agentes sobre Git. Esta é a *capacidade* ("como colaborar"), separada do *contexto* de cada caso. É a **fonte única**: o arquivo vive em `idea-waddle/PROTOCOL.md` e é **embutido no `AGENTS.md` de cada repositório** (de caso ou da plataforma) por `engine/sync_protocol.py`, para que qualquer repo seja autossuficiente ao clonar — qualquer agente (Claude, Codex, Gemini…) ou humano lê tudo localmente, sem depender de link remoto.
@@ -114,5 +94,3 @@ Valida: ids únicos e referências existentes; restrições entre parâmetros **
 
 ## 7. Linha do tempo / ciclos
 A evolução é organizada em ciclos `cycles/NNN-slug.md` (front-matter YAML: `cycle`, `slug`, `status`, `authored_by`, e `model` se agente). Marcos discretos + o histórico do Git reconstroem a genealogia das ideias (forks/merges).
-
-<!-- END PROTOCOLO -->
