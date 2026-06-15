@@ -44,7 +44,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CASES_DIR = Path(os.environ.get("IW_CASES", ROOT / "cases"))
 SITE_DIR = Path(os.environ.get("IW_SITE", ROOT / "site"))
 # Limite de segurança para enumeração do produto cartesiano.
-ENUM_LIMIT = 2_000_000
+ENUM_LIMIT = 5_000_000
 # Status que aposentam uma opção (não é apagada — sai do cálculo, fica visível riscada).
 RETIRED = {"superseded", "rejected"}
 
@@ -678,22 +678,34 @@ function findConstraint(x, y){
 }
 const selected = {};       // paramId -> optId
 
-function hardFree(ids){
-  for (var i=0;i<DATA.constraints.length;i++){
-    var c = DATA.constraints[i];
-    if (c.degree==='incompatible' && ids.indexOf(c.a)>-1 && ids.indexOf(c.b)>-1) return false;
-  }
-  return true;
+// pares incompatíveis pré-indexados (ambas as ordens) p/ checagem O(1)
+var HARD = {};
+DATA.constraints.forEach(function(c){
+  if (c.degree==='incompatible'){ HARD[c.a+''+c.b]=1; HARD[c.b+''+c.a]=1; }
+});
+function conflictsWith(id, chosen){
+  for (var k=0;k<chosen.length;k++){ if (HARD[id+''+chosen[k]]) return true; }
+  return false;
 }
+// Conta configurações viáveis com poda incremental (sem alocar arrays por folha),
+// suportando espaços grandes sem travar a interação.
 function countViable(partial){
-  var ps = DATA.params, count = 0;
-  function rec(i, chosen){
-    if (i===ps.length){ if (hardFree(chosen)) count++; return; }
+  var ps = DATA.params, count = 0, chosen = [];
+  function rec(i){
+    if (i===ps.length){ count++; return; }
     var p = ps[i];
-    if (partial[p.id]) rec(i+1, chosen.concat(partial[p.id]));
-    else p.options.forEach(function(o){ rec(i+1, chosen.concat(o.id)); });
+    if (partial[p.id]){
+      var id = partial[p.id];
+      if (!conflictsWith(id, chosen)){ chosen.push(id); rec(i+1); chosen.pop(); }
+    } else {
+      var opts = p.options;
+      for (var j=0;j<opts.length;j++){
+        var oid = opts[j].id;
+        if (!conflictsWith(oid, chosen)){ chosen.push(oid); rec(i+1); chosen.pop(); }
+      }
+    }
   }
-  rec(0, []);
+  rec(0);
   return count;
 }
 
