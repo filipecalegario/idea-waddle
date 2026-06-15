@@ -120,8 +120,14 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 - **Problema (apontado pelo usuário):** o cálculo de estimativas estava acoplado ao cluster (`n_gpus`, `capex_per_gpu_brl`, PUE…) dentro do motor.
 - **Solução:** o caso declara suas **métricas** (fórmulas) em `morphology/metrics.yaml`; o motor só soma os campos `estimates` das opções + `assumptions` e **avalia as expressões** (avaliador de expressão seguro em JS, sem `eval`). O modelo de custo do cluster saiu do motor e foi para o repo do CIn (`metrics.yaml`). O caso da plataforma não tem `metrics.yaml` → não exibe cards quantitativos (prova da genericidade). `lint` valida `metrics.yaml`. Corrigido também um NBSP residual no template.
 
+### 2026-06-14 — Entrevista de simplificação + bug do protocolo (decisões pendentes, NÃO implementadas)
+- **Bug encontrado (teste com Codex):** clonando só o repo do caso, o agente **não acha o protocolo** — o `AGENTS.md` do caso apontava o protocolo canônico por **URL remota** (não autossuficiente). Contraria o `INTENT` ("todo o contexto dentro do agents.md ao clonar").
+- **Insight do usuário:** são **duas coisas** distintas — (a) *contexto* do caso (decisões do CIn, fica no repo do caso) e (b) *capacidade* "como colaborar" (o protocolo, reusável).
+- **Decisão (pendente de implementação):** protocolo como **arquivo commitado em cada repo, sem skill** (universal p/ Codex/Gemini/humano; autossuficiente no clone). Fonte única `idea-waddle/PROTOCOL.md` → **embutida** no `AGENTS.md` de cada repo entre marcadores; `engine/sync_protocol.py` (com `--check`) materializa e a CI do caso detecta *drift* (usa o checkout `_engine` já existente). Descartado: só-skill, MCP (não autossuficientes/cross-agent).
+- **Entrevista de complexidade (respostas do usuário):** incômodos = arquitetura (2 repos/motor/CI) + excesso de camadas no site; essenciais agora = **Caixa+CCA** e **IBIS+Dung** (QOC/estimativas e mapa/ciclo de vida seriam candidatos a ocultar/cortar); alvo = **plataforma genérica**; público inicial = humanos técnicos + agentes (YAML/PR ok). Tensão a resolver: quer genericidade mas se incomoda com 2 repos → avaliar **um repo só** (motor + protocolo + caso(s)), o que também elimina o bug do protocolo por construção. Tudo **pendente**, sem alteração de código.
+
 ## Estado atual (snapshot)
-- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** + motor agnóstico de domínio (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado.
+- **Fase:** chamada pública pronta para receber contribuições; **quatro camadas ativas** + motor agnóstico de domínio (Caixa/CCA · QOC · IBIS · Dung). Plataforma e caso CIn em **repositórios separados**, ambos com site vivo publicado. **Em discussão: simplificação (ver entrada acima).**
 - **Repositórios:** plataforma `github.com/filipecalegario/idea-waddle` (motor + protocolo + caso auto-referente); caso concreto `github.com/filipecalegario/cin-cluster-inferencia` (consome o motor via CI).
 - **Caso bundled na plataforma:** `idea-waddle-platform` (auto-referente, 9 params). O caso do CIn (11 params, ciclos 001/002) vive no repo próprio.
 - **Camada ativa:** caixa morfológica + CCA + **QOC (critérios + estimativas)** no site vivo interativo (tema dossiê). **Governança:** lint na CI + ratificação humana (CODEOWNERS). Camadas IBIS/Dung: ganchos prontos, ainda não implementadas.
@@ -129,6 +135,8 @@ Plataforma de **colaboração criativa entre humanos e agentes de IA usando o Gi
 
 ## Decisões em aberto
 (ver detalhes em [`/docs/discovery/04-perguntas-provocacoes.md`](../discovery/04-perguntas-provocacoes.md))
+- **[A IMPLEMENTAR] Protocolo autossuficiente por repo:** `PROTOCOL.md` (fonte em idea-waddle) embutido no `AGENTS.md` de cada repo via `sync_protocol.py` + checagem de drift na CI. Sem skill/MCP. (Conserta o bug do clone-só-do-caso.)
+- **[EM ABERTO] Simplificação:** reduzir camadas no site (manter Caixa+CCA e IBIS+Dung; ocultar/cortar QOC-estimativas e mapa/ciclo de vida?) e repensar arquitetura — possivelmente **um repo só** (motor + protocolo + casos).
 - **Substrato:** GitHub (preferência atual) vs. GitLab self-hosted (soberania de dados p/ UFPE).
 - **Política de diversidade operacional:** quorum de modelos? cotas humano:agente por ciclo? como medir diversidade?
 - **Refinar os placeholders** de estimativas/escores com números pesquisados/medidos (tarifa real de PE/UFPE, preços de GPU, PUE).
