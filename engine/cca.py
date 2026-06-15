@@ -591,7 +591,8 @@ CASE_TEMPLATE = r"""<!doctype html>
     .instrument { position:static; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
-</style></head>
+</style>
+__CASE_THEME_LINK__</head>
 <body>
 <div class="topbar"></div>
 <div class="wrap">
@@ -1093,6 +1094,15 @@ def render_case_html(case: dict, cca: dict, generated: str, case_dir: Path | Non
         .replace("__QOCMATRIX__", qoc_html or "<p class='note'>Sem critérios qualitativos ainda.</p>")
         .replace("__EVOLUTION__", evolution_html)
         .replace("__DATA_JSON__", data_json)
+        # Tema por-caso (opcional): se o caso traz um theme.css na raiz, ele é
+        # linkado DEPOIS do <style> embutido e sobrescreve as variáveis :root.
+        # Mantém o motor genérico; cada caso pode vestir sua identidade.
+        .replace(
+            "__CASE_THEME_LINK__",
+            '<link rel="stylesheet" href="theme.css">\n'
+            if case_dir and (case_dir / "theme.css").exists()
+            else "",
+        )
     )
 
 
@@ -1173,6 +1183,12 @@ def main() -> int:
             json.dumps({"case": case, "cca": cca}, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+        # Copia o tema por-caso (se existir) para junto da página gerada.
+        theme_src = case_dir / "theme.css"
+        if theme_src.exists():
+            (out_dir / "theme.css").write_text(
+                theme_src.read_text(encoding="utf-8"), encoding="utf-8"
+            )
         print(
             f"[{case['id']}] {cca['n_parameters']} params · "
             f"{cca['total_configs']:,} totais · "
